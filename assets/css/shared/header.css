@@ -1,0 +1,110 @@
+/* Shared header layout.
+   Page-wide tokens and typography live in ../style.css.
+*/
+
+.topbar {
+  isolation: isolate;
+}
+
+.brand-wrap,
+.search-box,
+.top-actions {
+  min-width: 0;
+}
+
+.search-box input {
+  min-width: 0;
+}
+
+.menu-trigger {
+  position: relative;
+  width: 34px;
+  height: 34px;
+}
+
+.menu-trigger .menu-lines {
+  position: absolute;
+  top: 11px;
+  left: 9px;
+  order: initial;
+  margin: 0;
+}
+
+.menu-trigger:hover .brand-mark,
+.menu-trigger:focus-visible .brand-mark {
+  opacity: 0;
+  transform: scale(0.75);
+}
+
+.menu-trigger:hover .menu-lines,
+.menu-trigger:focus-visible .menu-lines {
+  opacity: 1;
+  transform: none;
+}
+
+.profile-menu-wrap {
+  position: relative;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px;
+  border-radius: 9px;
+}
+
+.profile-trigger:hover,
+.profile-trigger:focus-visible {
+  background: #f7f7fb;
+  outline: 0;
+}
+
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 30;
+  width: 160px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.profile-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 11px;
+  border-radius: 7px;
+  color: var(--ink);
+  font-size: 12px;
+  text-align: left;
+}
+
+.profile-option:hover,
+.profile-option:focus-visible {
+  background: #f4f1ff;
+  color: var(--purple);
+  outline: 0;
+}
+
+.profile-option span {
+  color: #aaa;
+  font-size: 18px;
+}
+
+@media (max-width: 850px) {
+  .menu-trigger .brand-mark {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+
+  .menu-trigger .menu-lines {
+    opacity: 1;
+    transform: none;
+  }
+}
