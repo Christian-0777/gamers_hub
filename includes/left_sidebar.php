@@ -1,0 +1,71 @@
+<?php
+
+$dashboardActivePage = $dashboardActivePage ?? 'home';
+$name = $name ?? 'Gamer';
+$avatar = $avatar ?? appUrl('assets/icons/profile.png');
+$profileUrl = $profileUrl ?? appUrl('home');
+
+?>
+<aside class="dashboard-sidebar" id="dashboardSidebar">
+    <div class="dashboard-brand">
+        <img class="dashboard-brand-mark" src="<?= htmlspecialchars(appUrl('assets/icons/logo.png'), ENT_QUOTES, 'UTF-8') ?>" alt="">
+        <span class="dashboard-brand-name">GamersHUB</span>
+    </div>
+
+    <nav class="dashboard-nav" aria-label="Dashboard navigation">
+        <div class="dashboard-section-title">Overview</div>
+        <a href="<?= htmlspecialchars(appUrl('home'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item<?= $dashboardActivePage === 'home' ? ' active' : '' ?>">
+            <span class="material-symbols-rounded" aria-hidden="true">dashboard</span>
+            <span class="dashboard-nav-label">Dashboard</span>
+        </a>
+        <a href="<?= htmlspecialchars(appUrl('analytics'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item<?= $dashboardActivePage === 'analytics' ? ' active' : '' ?>">
+            <span class="material-symbols-rounded" aria-hidden="true">analytics</span>
+            <span class="dashboard-nav-label">Analytics</span>
+        </a>
+        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="My games">
+            <span class="material-symbols-rounded" aria-hidden="true">sports_esports</span>
+            <span class="dashboard-nav-label">My games</span>
+            <span class="badge-mini">8</span>
+        </a>
+        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="Friends">
+            <span class="material-symbols-rounded" aria-hidden="true">groups</span>
+            <span class="dashboard-nav-label">Friends</span>
+        </a>
+
+        <div class="dashboard-section-title">Manage</div>
+        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="Achievements">
+            <span class="material-symbols-rounded" aria-hidden="true">trophy</span>
+            <span class="dashboard-nav-label">Achievements</span>
+        </a>
+        <a href="<?= htmlspecialchars(appUrl('message'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item<?= $dashboardActivePage === 'message' ? ' active' : '' ?>">
+            <span class="material-symbols-rounded" aria-hidden="true">chat</span>
+            <span class="dashboard-nav-label">Messages</span>
+        </a>
+        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="Notifications">
+            <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+            <span class="dashboard-nav-label">Notifications</span>
+        </a>
+        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="GClan">
+            <span class="material-symbols-rounded" aria-hidden="true">groups</span>
+            <span class="dashboard-nav-label">GClan</span>
+        </a>
+
+        <div class="dashboard-section-title">Support</div>
+        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="Help center">
+            <span class="material-symbols-rounded" aria-hidden="true">help</span>
+            <span class="dashboard-nav-label">Help center</span>
+        </a>
+    </nav>
+
+    <div class="dashboard-sidebar-footer">
+        <div class="dashboard-sidebar-user">
+            <img class="dashboard-avatar" src="<?= htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') ?>" alt="">
+            <div class="dashboard-user-copy">
+                <div class="dashboard-user-name"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="dashboard-user-role">Gamer</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<?php require __DIR__ . '/coming_soon_modal.php'; ?>
