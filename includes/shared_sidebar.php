@@ -41,11 +41,11 @@
             <span class="nav-count">5</span>
         </button>
 
-        <button class="nav-link coming-soon" type="button">
+        <a class="nav-link" href="<?= htmlspecialchars(appUrl('settings'), ENT_QUOTES, 'UTF-8') ?>">
             <span class="nav-icon">⚙</span>
             Settings
             <span class="nav-arrow">›</span>
-        </button>
+        </a>
     </nav>
 
     <div class="sidebar-bottom">

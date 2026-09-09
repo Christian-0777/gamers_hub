@@ -20,6 +20,13 @@ RewriteRule ^(?:auth_page/)?verify\.php$ %1/verify [R=301,L]
 RewriteCond %{THE_REQUEST} \s(.*?)/authenticated_pages/home\.php(?:[?\s]) [NC]
 RewriteRule ^authenticated_pages/home\.php$ %1/home [R=301,L]
 
+RewriteCond %{THE_REQUEST} \s(.*?)/authenticated_pages/account\.php(?:[?\s]) [NC]
+RewriteRule ^authenticated_pages/account\.php$ %1/settings [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+[^?\ ]*/authenticated_pages/profile\.php(?:[?\s]) [NC]
+RewriteCond %{QUERY_STRING} (^|&)username=([^&]+)(&|$) [NC]
+RewriteRule ^authenticated_pages/profile\.php$ @%2 [R=301,L,NE]
+
 # Send clean application URLs to the PHP front controller while preserving assets.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

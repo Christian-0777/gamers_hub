@@ -60,6 +60,10 @@
   outline: 0;
 }
 
+.header-avatar {
+  object-fit: cover;
+}
+
 .profile-menu {
   position: absolute;
   top: calc(100% + 12px);

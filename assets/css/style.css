@@ -103,8 +103,7 @@ button {
     transform: rotate(-8deg);
 }
 
-.menu-trigger:hover .menu-lines,
-.menu-trigger:focus .menu-lines {
+.menu-trigger:hover .menu-lines {
     opacity: 1;
     transform: translateX(0);
 }

@@ -724,10 +724,10 @@ $posts = [
 
 </div>
 
-<script src="../assets/js/shared/header.js"></script>
-<script src="../assets/js/shared/sidebar.js"></script>
-<script src="../assets/js/shared/footer.js"></script>
-<script src="../assets/js/layout_functions.js"></script>
+<script src="<?= htmlspecialchars(appUrl('assets/js/shared/header.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script src="<?= htmlspecialchars(appUrl('assets/js/shared/sidebar.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script src="<?= htmlspecialchars(appUrl('assets/js/shared/footer.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script src="<?= htmlspecialchars(appUrl('assets/js/layout_functions.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 
 </body>
 

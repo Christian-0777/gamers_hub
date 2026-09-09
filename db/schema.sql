@@ -79,6 +79,19 @@ CREATE TABLE user_profiles (
 
     bio VARCHAR(500) NULL,
 
+    profile_visibility ENUM(
+        'public',
+        'friends_only',
+        'followers_only',
+        'private'
+    ) NOT NULL DEFAULT 'public',
+
+    who_can_message ENUM(
+        'everyone',
+        'followers',
+        'friends'
+    ) NOT NULL DEFAULT 'everyone',
+
     avatar_url VARCHAR(500) NULL,
     cover_url VARCHAR(500) NULL,
 
@@ -91,6 +104,11 @@ CREATE TABLE user_profiles (
     ) NOT NULL DEFAULT 'both',
 
     preferred_voice_chat BOOLEAN NOT NULL DEFAULT TRUE,
+
+    email_notifications BOOLEAN NOT NULL DEFAULT TRUE,
+    push_notifications BOOLEAN NOT NULL DEFAULT TRUE,
+    social_notifications BOOLEAN NOT NULL DEFAULT TRUE,
+    two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
 
     online_status ENUM(
         'online',
@@ -113,6 +131,7 @@ CREATE TABLE user_profiles (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
+
 
 
 -- ============================================================
@@ -139,6 +158,31 @@ CREATE TABLE sessions (
 
     INDEX idx_sessions_user (user_id),
     INDEX idx_sessions_expires (expires_at)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE user_login_history (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    user_id BIGINT UNSIGNED NOT NULL,
+    device_name VARCHAR(120) NOT NULL,
+    ip_hash CHAR(64) NOT NULL,
+    user_agent TEXT NULL,
+    action ENUM(
+        'login',
+        'logout',
+        'security_check'
+    ) NOT NULL DEFAULT 'login',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_login_history_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    INDEX idx_login_history_user (user_id),
+    INDEX idx_login_history_created_at (created_at)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;

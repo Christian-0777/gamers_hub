@@ -1,5 +1,42 @@
  # GamersHUB
 
+## Official Update v2.1
+
+### Settings and Media Fixes
+
+- Fixed the application base URL resolution so redirects and asset paths resolve correctly under the app root instead of nested API folders
+- Corrected the settings save flow to avoid redirecting users back to the login page when a valid authenticated session is active
+- Ensured file calls and asset paths work correctly for the settings page, API endpoints, and shared layout resources
+- Removed external URL support for profile and cover photo updates so only uploaded files are accepted for image changes
+- Kept the photo upload flow limited to the actual file upload path and prevented URL-based image inputs from interfering with the save process
+- Restricted compression to images larger than 5MB so smaller uploads are stored without unnecessary processing
+- Normalized uploaded media URLs to public app-relative paths so browser image requests resolve correctly instead of using local filesystem paths
+- Added stronger protection in the image upload flow to keep the compressor from running for already-safe files
+
+## Official Update v2.0
+
+### Profile Page Refresh
+
+- Redesigned the profile page into a cleaner desktop-first layout with a cover photo, avatar, username metadata, and stat summary
+- Added a modern profile header that collapses into a compact sticky state while scrolling
+- Reworked the tab structure to show Posts, Games, Achievements, and About sections
+- Added a proper empty-state for users with no public posts
+- Integrated the DB-backed post fetch flow through the profile post API
+- Kept the Games, Achievements, and About tabs as coming-soon placeholders for future feature builds
+- Updated the current-user profile experience to show Edit Profile instead of Follow
+- Removed the legacy profile styling flow and replaced it with the new profile layout styles and script behavior
+
+### Account Settings & Storage Update
+
+- Added a dedicated account settings page with tabs for Account, Privacy, Notifications, and Security
+- Implemented profile controls for display name, bio, profile photo URL, cover photo URL, gaming style, voice chat availability, and content preference updates
+- Added privacy controls for profile visibility and who can message the user
+- Added notification toggles for email, push, and social alerts
+- Added a security panel with active sessions, login history, and 2FA toggle support
+- Added clean URL routing for `/settings` and removed internal PHP file exposure from the browser path
+- Documented the upload storage convention for profile, cover, and post media files under `uploads/profile`, `uploads/cover`, and `uploads/post/post_<username>_<post_id>/`
+- Added migration support in `db/migration.sql` for settings and storage-related database updates
+
 ## Minor Update v1.2
 
 The onboarding and email verification flow has been fixed and expanded.

@@ -1,3 +1,12 @@
+<?php
+require_once __DIR__ . '/../config/db.php';
+
+$headerUserStatement = db()->prepare('SELECT username, display_name, avatar_url FROM users u INNER JOIN user_profiles p ON p.user_id = u.id WHERE u.id = :user_id LIMIT 1');
+$headerUserStatement->execute(['user_id' => $_SESSION['user_id'] ?? 0]);
+$headerUser = $headerUserStatement->fetch() ?: ['username' => '', 'display_name' => 'Profile', 'avatar_url' => null];
+$headerInitials = strtoupper(substr((string) $headerUser['display_name'], 0, 1) . substr((string) $headerUser['username'], 0, 1));
+$headerAvatar = $headerUser['avatar_url'] ?: appUrl('assets/icons/profile.png');
+?>
 <header class="topbar">
   <div class="brand-wrap">
     <button
@@ -45,28 +54,38 @@
         aria-controls="profile-menu"
         aria-expanded="false"
       >
-        <span class="avatar avatar-coral">AK</span>
-        <span class="profile-name">Alex Kim</span>
+        <img
+          class="avatar header-avatar"
+          src="<?= htmlspecialchars($headerAvatar, ENT_QUOTES, 'UTF-8') ?>"
+          alt="<?= htmlspecialchars($headerUser['display_name'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+        <span class="profile-name"><?= htmlspecialchars($headerUser['display_name'], ENT_QUOTES, 'UTF-8') ?></span>
       </button>
 
       <div class="profile-menu" id="profile-menu" hidden>
-        <button
+        <a
           class="profile-option"
-          type="button"
-          data-profile-action="Profile"
+          href="<?= htmlspecialchars(appUrl('@' . $headerUser['username']), ENT_QUOTES, 'UTF-8') ?>"
         >
           Profile
           <span>›</span>
-        </button>
+        </a>
 
-        <button
+        <a
           class="profile-option"
-          type="button"
-          data-profile-action="Log out"
+          href="<?= htmlspecialchars(appUrl('settings'), ENT_QUOTES, 'UTF-8') ?>"
+        >
+          Settings
+          <span>›</span>
+        </a>
+
+        <a
+          class="profile-option"
+          href="<?= htmlspecialchars(appUrl('logout'), ENT_QUOTES, 'UTF-8') ?>"
         >
           Log out
           <span>›</span>
-        </button>
+        </a>
       </div>
     </div>
   </div>

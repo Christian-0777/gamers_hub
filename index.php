@@ -14,7 +14,9 @@ $route = trim(substr($requestPath, strlen($basePath)), '/');
 
 $routes = [
     'home' => __DIR__ . '/authenticated_pages/home.php',
+    'settings' => __DIR__ . '/authenticated_pages/account.php',
     'login' => __DIR__ . '/auth_page/login.php',
+    'logout' => __DIR__ . '/auth_page/logout.php',
     'signup' => __DIR__ . '/auth_page/signup.php',
     'verify' => __DIR__ . '/auth_page/verify.php',
     'preferences' => __DIR__ . '/auth_page/preferences.php',
@@ -27,6 +29,12 @@ if ($route === '' && isset($_SESSION['user_id'], $_SESSION['auth_session_id'])) 
 
 if (isset($routes[$route])) {
     require $routes[$route];
+    exit;
+}
+
+if (preg_match('/^@([A-Za-z0-9_]{3,30})$/', $route, $matches)) {
+    $_GET['username'] = $matches[1];
+    require __DIR__ . '/authenticated_pages/profile.php';
     exit;
 }
 

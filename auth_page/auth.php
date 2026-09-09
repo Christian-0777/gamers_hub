@@ -45,6 +45,7 @@ function handleAuthRequest(string $mode): array
 
     if ($mode === 'login') {
         $identifier = authInput('identifier');
+        $normalizedIdentifier = strtolower($identifier);
         $password = (string) ($_POST['password'] ?? '');
 
         if ($identifier === '') {
@@ -58,9 +59,14 @@ function handleAuthRequest(string $mode): array
             try {
                 $database = db();
                 $statement = $database->prepare(
-                    'SELECT id, username, password_hash, status FROM users WHERE email = :identifier OR username = :identifier LIMIT 1'
+                    'SELECT id, username, password_hash, status FROM users
+                     WHERE LOWER(email) = :email OR LOWER(username) = :username
+                     LIMIT 1'
                 );
-                $statement->execute(['identifier' => $identifier]);
+                $statement->execute([
+                    'email' => $normalizedIdentifier,
+                    'username' => $normalizedIdentifier,
+                ]);
                 $user = $statement->fetch();
 
                 if (!$user || !password_verify($password, $user['password_hash']) || $user['status'] !== 'active') {
