@@ -27,7 +27,7 @@ $profileUrl = $profileUrl ?? appUrl('home');
             <span class="dashboard-nav-label">My games</span>
             <span class="badge-mini">8</span>
         </a>
-        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="Friends">
+        <a href="<?= htmlspecialchars(appUrl('friends'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item<?= $dashboardActivePage === 'friends' ? ' active' : '' ?>">
             <span class="material-symbols-rounded" aria-hidden="true">groups</span>
             <span class="dashboard-nav-label">Friends</span>
         </a>
@@ -41,7 +41,7 @@ $profileUrl = $profileUrl ?? appUrl('home');
             <span class="material-symbols-rounded" aria-hidden="true">chat</span>
             <span class="dashboard-nav-label">Messages</span>
         </a>
-        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="Notifications">
+        <a href="<?= htmlspecialchars(appUrl('notifications'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item<?= $dashboardActivePage === 'notifications' ? ' active' : '' ?>">
             <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
             <span class="dashboard-nav-label">Notifications</span>
         </a>

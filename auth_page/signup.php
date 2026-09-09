@@ -46,7 +46,7 @@ $notice = $result['notice'];
                 <div class="password-field"><input id="password" name="password" type="password" autocomplete="new-password" required><button type="button" data-toggle-password="password" aria-label="Show password">Show</button></div>
                 <label for="password_confirmation">Confirm password</label>
                 <div class="password-field"><input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required><button type="button" data-toggle-password="password_confirmation" aria-label="Show password">Show</button></div>
-                <label class="check-row" for="terms"><input id="terms" name="terms" type="checkbox" value="1" <?= isset($_POST['terms']) ? 'checked' : '' ?> required><span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</span></label>
+                <label class="check-row" for="terms"><input id="terms" name="terms" type="checkbox" value="1" <?= isset($_POST['terms']) ? 'checked' : '' ?> required><span>I agree to the <a href="<?= htmlspecialchars(appUrl('partials/terms-of-use.html'), ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">Terms of Service</a> and <a href="<?= htmlspecialchars(appUrl('partials/privacy-policy.html'), ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</span></label>
                 <button class="primary-button" id="create-account-button" type="submit" disabled>Create account <span aria-hidden="true">&#8594;</span></button>
             </form>
             <div class="social-signup" aria-label="Social sign up options">

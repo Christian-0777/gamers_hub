@@ -11,6 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const accountMenu = document.querySelector('#dashboardAccountMenu');
   const currentPing = document.querySelector('#currentPing');
   const pingUrl = document.querySelector('[data-ping-url]')?.dataset.pingUrl;
+  const notificationTrigger = document.querySelector('#dashboardNotificationTrigger');
+  const notificationDropdown = document.querySelector('#dashboardNotificationDropdown');
+  const notificationList = document.querySelector('#dashboardNotificationList');
+  const notificationBadge = document.querySelector('#dashboardNotificationBadge');
+  const notificationCount = document.querySelector('#dashboardNotificationCount');
+  const notificationApiUrl = notificationTrigger?.dataset.notificationApiUrl || '';
+  const rightSidebar = document.querySelector('#dashboardRightSidebar');
+  const rightSidebarToggle = document.querySelector('#dashboardRightSidebarToggle');
+  const mobileRightSidebarToggle = document.querySelector('#dashboardMobileRightSidebarToggle');
 
   const showToast = (message) => {
     if (!toastElement) return;
@@ -51,6 +60,72 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (event) => {
     if (accountMenu && accountTrigger && !accountMenu.contains(event.target) && !accountTrigger.contains(event.target)) {
       closeAccountMenu();
+    }
+  });
+
+  const escapeNotificationText = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
+  const notificationIcon = { follow: 'person_add', reaction: 'favorite', comment: 'chat', share: 'share', mention: 'alternate_email', system: 'shield' };
+  const loadHeaderNotifications = async () => {
+    if (!notificationApiUrl || !notificationList) return;
+    try {
+      const response = await fetch(`${notificationApiUrl}?action=list&limit=4`, { cache: 'no-store' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to load notifications.');
+      const unread = Number(data.unread_count || 0);
+      notificationBadge.textContent = unread > 99 ? '99+' : String(unread);
+      notificationBadge.hidden = unread === 0;
+      notificationCount.textContent = `${unread} unread`;
+      notificationList.innerHTML = (data.notifications || []).length ? data.notifications.map((item) => `<a class="dashboard-notification-row${item.is_read ? '' : ' unread'}" href="${escapeNotificationText(document.querySelector('.dashboard-notification-more')?.href || '#')}" data-notification-id="${item.id}"><span class="material-symbols-rounded" aria-hidden="true">${notificationIcon[item.type] || 'notifications'}</span><span class="dashboard-notification-copy">${item.actor_name ? `<strong>${escapeNotificationText(item.actor_name)}</strong> ` : ''}${escapeNotificationText(item.message)}<small>${escapeNotificationText(item.created_at)}</small></span></a>`).join('') : '<div class="dashboard-notification-loading">You are all caught up.</div>';
+    } catch (error) {
+      notificationList.innerHTML = '<div class="dashboard-notification-loading">Notifications are unavailable right now.</div>';
+    }
+  };
+  const closeNotificationMenu = () => {
+    if (!notificationTrigger || !notificationDropdown) return;
+    notificationDropdown.hidden = true;
+    notificationTrigger.setAttribute('aria-expanded', 'false');
+  };
+  notificationTrigger?.addEventListener('click', async () => {
+    const isOpen = !notificationDropdown.hidden;
+    notificationDropdown.hidden = isOpen;
+    notificationTrigger.setAttribute('aria-expanded', String(!isOpen));
+    if (!isOpen) await loadHeaderNotifications();
+  });
+  document.addEventListener('click', (event) => {
+    if (notificationDropdown && notificationTrigger && !notificationDropdown.contains(event.target) && !notificationTrigger.contains(event.target)) closeNotificationMenu();
+  });
+  loadHeaderNotifications();
+  window.setInterval(loadHeaderNotifications, 30000);
+
+  const isMobile = () => window.innerWidth < 992;
+  const closeMobileRightSidebar = () => rightSidebar?.classList.remove('show');
+  const applyRightSidebarState = () => {
+    if (isMobile()) {
+      closeMobileRightSidebar();
+      return;
+    }
+
+    document.body.classList.add('right-sidebar-collapsed');
+    rightSidebarToggle?.setAttribute('aria-expanded', 'false');
+    rightSidebarToggle?.setAttribute('aria-label', 'Expand community sidebar');
+    rightSidebarToggle?.querySelector('.material-symbols-rounded')?.replaceChildren('right_panel_open');
+  };
+
+  applyRightSidebarState();
+  rightSidebarToggle?.addEventListener('click', () => {
+    if (isMobile()) return;
+    const collapsed = document.body.classList.toggle('right-sidebar-collapsed');
+    rightSidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+    rightSidebarToggle.setAttribute('aria-label', collapsed ? 'Expand community sidebar' : 'Collapse community sidebar');
+    rightSidebarToggle.querySelector('.material-symbols-rounded').textContent = collapsed ? 'right_panel_open' : 'right_panel_close';
+  });
+  mobileRightSidebarToggle?.addEventListener('click', () => {
+    rightSidebar?.classList.toggle('show');
+    mobileRightSidebarToggle.setAttribute('aria-expanded', String(rightSidebar?.classList.contains('show')));
+  });
+  window.addEventListener('resize', () => {
+    if (isMobile()) {
+      closeMobileRightSidebar();
     }
   });
   accountTrigger?.addEventListener('keydown', (event) => {
@@ -108,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!dashboardSidebar || !dashboardMain || !dashboardBackdrop || !dashboardToggle) return;
 
-  const isMobile = () => window.innerWidth < 992;
   const closeMobileSidebar = () => {
     dashboardSidebar.classList.remove('show');
     dashboardBackdrop.classList.remove('show');

@@ -1,5 +1,15 @@
 # GamersHUB
 
+## Official Update v3.1
+
+### Community Right Sidebar
+
+- Added a shared right sidebar positioned below the dashboard header across authenticated pages
+- Added a collapsed-by-default community rail with an in-sidebar toggle and responsive mobile behavior
+- Added database-backed mutual friend data, including online status, selected games, and weekly post activity
+- Added online friends versus total friends counts
+- Added a GClan members online placeholder marked as coming soon
+
 ## Patch Update v3.0.1
 
 ### Shared Layout and Branding Fixes

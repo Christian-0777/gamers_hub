@@ -5,9 +5,9 @@
   </div>
 
   <nav>
-    <a href="#">Terms of Use</a>
-    <a href="#">Privacy Policy</a>
-    <a href="#">Update Logs</a>
+    <a href="<?= htmlspecialchars(appUrl('partials/terms-of-use.html'), ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">Terms of Use</a>
+    <a href="<?= htmlspecialchars(appUrl('partials/privacy-policy.html'), ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+    <a href="<?= htmlspecialchars(appUrl('partials/change_log.html'), ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">Update Logs</a>
   </nav>
 
   <p>© 2026 GamersHUB. All rights reserved.</p>

@@ -14,12 +14,16 @@ $route = trim(substr($requestPath, strlen($basePath)), '/');
 $homePage = __DIR__ . '/authenticated_pages/home.php';
 $analyticsPage = __DIR__ . '/authenticated_pages/analytics.php';
 $messagePage = __DIR__ . '/authenticated_pages/message.php';
+$notificationsPage = __DIR__ . '/authenticated_pages/notifications.php';
+$friendsPage = __DIR__ . '/authenticated_pages/friends.php';
 
 $routes = [
     // Use analytics until the new home page is created.
     'home' => is_file($homePage) ? $homePage : $analyticsPage,
     'analytics' => $analyticsPage,
     'message' => $messagePage,
+    'notifications' => $notificationsPage,
+    'friends' => $friendsPage,
     'settings' => __DIR__ . '/authenticated_pages/account.php',
     'login' => __DIR__ . '/auth_page/login.php',
     'logout' => __DIR__ . '/auth_page/logout.php',

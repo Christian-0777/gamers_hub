@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Friends | Gamers Hub</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+        :root {
+            --ink: #20222a;
+            --muted: #858997;
+            --paper: #ffffff;
+            --lime: #c9f45b;
+            --purple: #6c55d9;
+            --coral: #f47b69;
+            --navy: #28224c;
+            --background: #f5f4f8;
+            --border: #e9e7ef;
+            --success: #35b779;
+            --warning: #f5b942;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--ink);
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        /* =========================================================
+           PAGE
+        ========================================================= */
+
+        .friends-page {
+            min-height: 100vh;
+            padding: 32px;
+        }
+
+        .page-container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* =========================================================
+           HEADER
+        ========================================================= */
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 30px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            color: var(--muted);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .header-search {
+            position: relative;
+        }
+
+        .header-search i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+        }
+
+        .header-search input {
+            min-width: 280px;
+            height: 46px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding-left: 43px;
+            background: var(--paper);
+            box-shadow: 0 3px 12px rgba(40, 34, 76, 0.04);
+        }
+
+        .header-search input:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(108, 85, 217, 0.12);
+        }
+
+        /* =========================================================
+           TABS
+        ========================================================= */
+
+        .friends-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 6px;
+            background: var(--paper);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 24px;
+            width: fit-content;
+            box-shadow: 0 3px 12px rgba(40, 34, 76, 0.03);
+        }
+
+        .friends-tab {
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .friends-tab:hover {
+            color: var(--ink);
+            background: #f5f3fa;
+        }
+
+        .friends-tab.active {
+            color: var(--navy);
+            background: var(--lime);
+        }
+
+        .tab-count {
+            margin-left: 5px;
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        /* =========================================================
+           CONTENT GRID
+        ========================================================= */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 350px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* =========================================================
+           SECTION CARD
+        ========================================================= */
+
+        .section-card {
+            background: var(--paper);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 5px 18px rgba(40, 34, 76, 0.04);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .section-description {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .section-body {
+            padding: 18px;
+        }
+
+        /* =========================================================
+           FRIEND REQUEST
+        ========================================================= */
+
+        .request-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 12px;
+            transition: 0.2s ease;
+        }
+
+        .request-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .request-card:hover {
+            border-color: #d9d4ec;
+            transform: translateY(-1px);
+        }
+
+        /* =========================================================
+           AVATAR
+        ========================================================= */
+
+        .avatar-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .avatar-purple {
+            background: linear-gradient(135deg, #6c55d9, #9380ef);
+        }
+
+        .avatar-coral {
+            background: linear-gradient(135deg, #f47b69, #ff9b89);
+        }
+
+        .avatar-blue {
+            background: linear-gradient(135deg, #4389e8, #66b2ff);
+        }
+
+        .avatar-green {
+            background: linear-gradient(135deg, #36a96f, #62d493);
+        }
+
+        .avatar-orange {
+            background: linear-gradient(135deg, #e89a38, #ffc45f);
+        }
+
+        .avatar-pink {
+            background: linear-gradient(135deg, #d95e9c, #ef8ac1);
+        }
+
+        .status-dot {
+            position: absolute;
+            width: 13px;
+            height: 13px;
+            right: 0;
+            bottom: 1px;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .status-online {
+            background: var(--success);
+        }
+
+        .status-away {
+            background: var(--warning);
+        }
+
+        .status-offline {
+            background: #b9bbc5;
+        }
+
+        /* =========================================================
+           USER INFORMATION
+        ========================================================= */
+
+        .user-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .user-name {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .username {
+            margin: 2px 0 7px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .gaming-info {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .gaming-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            background: #f5f3fa;
+            border-radius: 7px;
+            color: #5e5874;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .online-text {
+            color: var(--success);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .away-text {
+            color: #c28c17;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .offline-text {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           BUTTONS
+        ========================================================= */
+
+        .btn-message {
+            border: 0;
+            background: var(--navy);
+            color: white;
+            border-radius: 9px;
+            padding: 8px 13px;
+            font-size: 12px;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .btn-message:hover {
+            background: #3c336b;
+            color: white;
+        }
+
+        .btn-accept {
+            border: 0;
+            background: var(--lime);
+            color: var(--navy);
+            border-radius: 9px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .btn-accept:hover {
+            background: #bce94d;
+        }
+
+        .btn-decline {
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--muted);
+            border-radius: 9px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .btn-decline:hover {
+            color: var(--ink);
+            background: #f7f6fa;
+        }
+
+        .btn-add {
+            border: 0;
+            background: var(--purple);
+            color: white;
+            border-radius: 9px;
+            padding: 8px 13px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .btn-add:hover {
+            background: #5b45c3;
+            color: white;
+        }
+
+        /* =========================================================
+           FRIEND LIST
+        ========================================================= */
+
+        .friends-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .friend-search {
+            position: relative;
+            flex: 1;
+        }
+
+        .friend-search i {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+        }
+
+        .friend-search input {
+            width: 100%;
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding-left: 38px;
+            font-size: 13px;
+        }
+
+        .friend-search input:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(108, 85, 217, 0.1);
+        }
+
+        .friend-count {
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .friend-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            transition: 0.2s ease;
+        }
+
+        .friend-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .friend-card:hover {
+            border-color: #d9d4ec;
+            box-shadow: 0 4px 15px rgba(40, 34, 76, 0.05);
+        }
+
+        .friend-actions {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .dropdown-toggle::after {
+            display: none;
+        }
+
+        .btn-more {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--muted);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-more:hover {
+            background: #f7f6fa;
+            color: var(--ink);
+        }
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .sidebar-card {
+            margin-bottom: 18px;
+        }
+
+        .sidebar-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 11px;
+            padding: 13px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:first-child {
+            padding-top: 0;
+        }
+
+        .activity-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .activity-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: #f2effb;
+            color: var(--purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-name {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .activity-status {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* =========================================================
+           PEOPLE YOU MAY KNOW
+        ========================================================= */
+
+        .suggestion {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .suggestion:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .suggestion .avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 12px;
+        }
+
+        .suggestion-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .suggestion-name {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .suggestion-game {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .btn-suggestion {
+            border: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #f1eefb;
+            color: var(--purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-suggestion:hover {
+            background: var(--purple);
+            color: white;
+        }
+
+        /* =========================================================
+           EMPTY STATE
+        ========================================================= */
+
+        .empty-state {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state i {
+            font-size: 35px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 13px;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 1100px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 18px;
+            }
+
+            .sidebar-card {
+                margin-bottom: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .friends-page {
+                padding: 20px 14px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+
+            .header-search input {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .friends-tabs {
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .friends-tab {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .sidebar {
+                grid-template-columns: 1fr;
+            }
+
+            .friend-card,
+            .request-card {
+                align-items: flex-start;
+            }
+
+            .friend-actions {
+                margin-left: auto;
+            }
+
+            .btn-message {
+                display: none;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .section-header {
+                padding: 16px;
+            }
+
+            .section-body {
+                padding: 12px;
+            }
+
+            .friend-card,
+            .request-card {
+                gap: 10px;
+            }
+
+            .gaming-info {
+                display: none;
+            }
+
+            .friend-actions {
+                flex-shrink: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="friends-page">
+
+    <div class="page-container">
+
+        <!-- =====================================================
+             PAGE HEADER
+        ====================================================== -->
+
+        <div class="page-header d-flex justify-content-between align-items-center">
+
+            <div>
+                <h1 class="page-title">Friends</h1>
+
+                <p class="page-subtitle">
+                    Your gaming network
+                </p>
+            </div>
+
+            <div class="header-search">
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="globalSearch"
+                    class="form-control"
+                    placeholder="Search friends..."
+                >
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             NAVIGATION TABS
+        ====================================================== -->
+
+        <div class="friends-tabs">
+
+            <button
+                class="friends-tab active"
+                data-tab="friends"
+            >
+                All Friends
+                <span class="tab-count">128</span>
+            </button>
+
+            <button
+                class="friends-tab"
+                data-tab="requests"
+            >
+                Requests
+                <span class="tab-count">3</span>
+            </button>
+
+            <button
+                class="friends-tab"
+                data-tab="sent"
+            >
+                Sent
+                <span class="tab-count">2</span>
+            </button>
+
+            <button
+                class="friends-tab"
+                data-tab="gamers"
+            >
+                Find Gamers
+            </button>
+
+        </div>
+
+
+        <!-- =====================================================
+             MAIN CONTENT
+        ====================================================== -->
+
+        <div class="content-grid">
+
+            <!-- =================================================
+                 LEFT COLUMN
+            ================================================== -->
+
+            <main>
+
+                <!-- =============================================
+                     FRIEND REQUESTS
+                ============================================== -->
+
+                <section class="section-card mb-4">
+
+                    <div class="section-header">
+
+                        <div>
+                            <h2 class="section-title">
+                                Friend Requests
+                            </h2>
+
+                            <p class="section-description">
+                                Players who want to join your network
+                            </p>
+                        </div>
+
+                        <button
+                            class="btn btn-sm text-muted"
+                            onclick="showRequests()"
+                        >
+                            See all
+                        </button>
+
+                    </div>
+
+                    <div class="section-body">
+
+                        <!-- Request 1 -->
+
+                        <div class="request-card">
+
+                            <div class="avatar-wrapper">
+
+                                <div class="avatar avatar-coral">
+                                    AS
+                                </div>
+
+                                <span class="status-dot status-online"></span>
+
+                            </div>
+
+                            <div class="user-info">
+
+                                <h3 class="user-name">
+                                    Alex Santos
+                                </h3>
+
+                                <p class="username">
+                                    @alexsantos
+                                </p>
+
+                                <div class="gaming-info">
+
+                                    <span class="gaming-tag">
+                                        <i class="bi bi-controller"></i>
+                                        Valorant
+                                    </span>
+
+                                    <span class="gaming-tag">
+                                        <i class="bi bi-pc-display"></i>
+                                        PC
+                                    </span>
+
+                                    <span class="gaming-tag">
+                                        4 mutual friends
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex gap-2">
+
+                                <button
+                                    class="btn-accept"
+                                    onclick="acceptRequest(this, 'Alex Santos')"
+                                >
+                                    Accept
+                                </button>
+
+                                <button
+                                    class="btn-decline"
+                                    onclick="declineRequest(this)"
+                                >
+                                    Decline
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Request 2 -->
+
+                        <div class="request-card">
+
+                            <div class="avatar-wrapper">
+
+                                <div class="avatar avatar-blue">
+                                    MR
+                                </div>
+
+                                <span class="status-dot status-online"></span>
+
+                            </div>
+
+                            <div class="user-info">
+
+                                <h3 class="user-name">
+                                    Miguel Reyes
+                                </h3>
+
+                                <p class="username">
+                                    @miguelr
+                                </p>
+
+                                <div class="gaming-info">
+
+                                    <span class="gaming-tag">
+                                        <i class="bi bi-controller"></i>
+                                        Counter-Strike 2
+                                    </span>
+
+                                    <span class="gaming-tag">
+                                        <i class="bi bi-pc-display"></i>
+                                        PC
+                                    </span>
+
+                                    <span class="gaming-tag">
+                                        2 mutual friends
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex gap-2">
+
+                                <button
+                                    class="btn-accept"
+                                    onclick="acceptRequest(this, 'Miguel Reyes')"
+                                >
+                                    Accept
+                                </button>
+
+                                <button
+                                    class="btn-decline"
+                                    onclick="declineRequest(this)"
+                                >
+                                    Decline
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =============================================
+                     YOUR FRIENDS
+                ============================================== -->
+
+                <section class="section-card">
+
+                    <div class="section-header">
+
+                        <div>
+                            <h2 class="section-title">
+                                Your Friends
+                            </h2>
+
+                            <p class="section-description">
+                                Players in your gaming network
+                            </p>
+                        </div>
+
+                        <strong class="friend-count">
+                            128 friends
+                        </strong>
+
+                    </div>
+
+                    <div class="section-body">
+
+                        <div class="friends-toolbar">
+
+                            <div class="friend-search">
+
+                                <i class="bi bi-search"></i>
+
+                                <input
+                                    type="text"
+                                    id="friendSearch"
+                                    placeholder="Search your friends..."
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="friendsList">
+
+                            <!-- Friend 1 -->
+
+                            <div
+                                class="friend-card"
+                                data-name="Christian"
+                                data-game="valorant counter strike 2"
+                            >
+
+                                <div class="avatar-wrapper">
+
+                                    <div class="avatar avatar-purple">
+                                        CH
+                                    </div>
+
+                                    <span class="status-dot status-online"></span>
+
+                                </div>
+
+                                <div class="user-info">
+
+                                    <h3 class="user-name">
+                                        Christian
+                                    </h3>
+
+                                    <p class="username">
+                                        @christian
+                                    </p>
+
+                                    <div class="gaming-info">
+
+                                        <span class="online-text">
+                                            <i class="bi bi-circle-fill"></i>
+                                            Online
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            <i class="bi bi-controller"></i>
+                                            Valorant
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            CS2
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            Diamond
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            PC
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="friend-actions">
+
+                                    <button
+                                        class="btn-message"
+                                        onclick="messageUser('Christian')"
+                                    >
+                                        <i class="bi bi-chat"></i>
+                                        Message
+                                    </button>
+
+                                    <div class="dropdown">
+
+                                        <button
+                                            class="btn-more dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                        >
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                            <li>
+                                                <button class="dropdown-item">
+                                                    <i class="bi bi-person"></i>
+                                                    View Profile
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <button class="dropdown-item">
+                                                    <i class="bi bi-person-plus"></i>
+                                                    Follow
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+
+                                            <li>
+                                                <button
+                                                    class="dropdown-item text-danger"
+                                                >
+                                                    <i class="bi bi-person-x"></i>
+                                                    Unfriend
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <button
+                                                    class="dropdown-item text-danger"
+                                                >
+                                                    <i class="bi bi-slash-circle"></i>
+                                                    Block
+                                                </button>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Friend 2 -->
+
+                            <div
+                                class="friend-card"
+                                data-name="Mika Reyes"
+                                data-game="minecraft"
+                            >
+
+                                <div class="avatar-wrapper">
+
+                                    <div class="avatar avatar-pink">
+                                        MR
+                                    </div>
+
+                                    <span class="status-dot status-online"></span>
+
+                                </div>
+
+                                <div class="user-info">
+
+                                    <h3 class="user-name">
+                                        Mika Reyes
+                                    </h3>
+
+                                    <p class="username">
+                                        @mikareyes
+                                    </p>
+
+                                    <div class="gaming-info">
+
+                                        <span class="online-text">
+                                            <i class="bi bi-circle-fill"></i>
+                                            Online
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            <i class="bi bi-controller"></i>
+                                            Minecraft
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            Survival
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            PC
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="friend-actions">
+
+                                    <button
+                                        class="btn-message"
+                                        onclick="messageUser('Mika Reyes')"
+                                    >
+                                        <i class="bi bi-chat"></i>
+                                        Message
+                                    </button>
+
+                                    <div class="dropdown">
+
+                                        <button
+                                            class="btn-more dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                        >
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                            <li>
+                                                <button class="dropdown-item">
+                                                    <i class="bi bi-person"></i>
+                                                    View Profile
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <button class="dropdown-item">
+                                                    <i class="bi bi-person-plus"></i>
+                                                    Follow
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+
+                                            <li>
+                                                <button class="dropdown-item text-danger">
+                                                    <i class="bi bi-person-x"></i>
+                                                    Unfriend
+                                                </button>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Friend 3 -->
+
+                            <div
+                                class="friend-card"
+                                data-name="Jordan Cruz"
+                                data-game="gta v racing"
+                            >
+
+                                <div class="avatar-wrapper">
+
+                                    <div class="avatar avatar-orange">
+                                        JC
+                                    </div>
+
+                                    <span class="status-dot status-away"></span>
+
+                                </div>
+
+                                <div class="user-info">
+
+                                    <h3 class="user-name">
+                                        Jordan Cruz
+                                    </h3>
+
+                                    <p class="username">
+                                        @jordanc
+                                    </p>
+
+                                    <div class="gaming-info">
+
+                                        <span class="away-text">
+                                            <i class="bi bi-circle-fill"></i>
+                                            Away
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            <i class="bi bi-controller"></i>
+                                            GTA V
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            Racing
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            PC
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="friend-actions">
+
+                                    <button
+                                        class="btn-message"
+                                        onclick="messageUser('Jordan Cruz')"
+                                    >
+                                        <i class="bi bi-chat"></i>
+                                        Message
+                                    </button>
+
+                                    <div class="dropdown">
+
+                                        <button
+                                            class="btn-more dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                        >
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                            <li>
+                                                <button class="dropdown-item">
+                                                    <i class="bi bi-person"></i>
+                                                    View Profile
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <button class="dropdown-item text-danger">
+                                                    <i class="bi bi-person-x"></i>
+                                                    Unfriend
+                                                </button>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Friend 4 -->
+
+                            <div
+                                class="friend-card"
+                                data-name="Carlo Garcia"
+                                data-game="dota 2"
+                            >
+
+                                <div class="avatar-wrapper">
+
+                                    <div class="avatar avatar-green">
+                                        CG
+                                    </div>
+
+                                    <span class="status-dot status-offline"></span>
+
+                                </div>
+
+                                <div class="user-info">
+
+                                    <h3 class="user-name">
+                                        Carlo Garcia
+                                    </h3>
+
+                                    <p class="username">
+                                        @carlogarcia
+                                    </p>
+
+                                    <div class="gaming-info">
+
+                                        <span class="offline-text">
+                                            <i class="bi bi-circle-fill"></i>
+                                            Offline
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            <i class="bi bi-controller"></i>
+                                            Dota 2
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            Ancient
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            PC
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="friend-actions">
+
+                                    <button
+                                        class="btn-message"
+                                        onclick="messageUser('Carlo Garcia')"
+                                    >
+                                        <i class="bi bi-chat"></i>
+                                        Message
+                                    </button>
+
+                                    <div class="dropdown">
+
+                                        <button
+                                            class="btn-more dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                        >
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                            <li>
+                                                <button class="dropdown-item">
+                                                    <i class="bi bi-person"></i>
+                                                    View Profile
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <button class="dropdown-item text-danger">
+                                                    <i class="bi bi-person-x"></i>
+                                                    Unfriend
+                                                </button>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Friend 5 -->
+
+                            <div
+                                class="friend-card"
+                                data-name="Alex Mendoza"
+                                data-game="league of legends"
+                            >
+
+                                <div class="avatar-wrapper">
+
+                                    <div class="avatar avatar-blue">
+                                        AM
+                                    </div>
+
+                                    <span class="status-dot status-online"></span>
+
+                                </div>
+
+                                <div class="user-info">
+
+                                    <h3 class="user-name">
+                                        Alex Mendoza
+                                    </h3>
+
+                                    <p class="username">
+                                        @alexmendoza
+                                    </p>
+
+                                    <div class="gaming-info">
+
+                                        <span class="online-text">
+                                            <i class="bi bi-circle-fill"></i>
+                                            Online
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            <i class="bi bi-controller"></i>
+                                            League of Legends
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            Emerald
+                                        </span>
+
+                                        <span class="gaming-tag">
+                                            PC
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="friend-actions">
+
+                                    <button
+                                        class="btn-message"
+                                        onclick="messageUser('Alex Mendoza')"
+                                    >
+                                        <i class="bi bi-chat"></i>
+                                        Message
+                                    </button>
+
+                                    <div class="dropdown">
+
+                                        <button
+                                            class="btn-more dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                        >
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                            <li>
+                                                <button class="dropdown-item">
+                                                    <i class="bi bi-person"></i>
+                                                    View Profile
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <button class="dropdown-item text-danger">
+                                                    <i class="bi bi-person-x"></i>
+                                                    Unfriend
+                                                </button>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Empty Search State -->
+
+                            <div
+                                id="emptyState"
+                                class="empty-state"
+                            >
+                                <i class="bi bi-people"></i>
+
+                                <p>
+                                    No friends found.
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================================
+     BOOTSTRAP
+============================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+></script>
+
+
+<!-- =============================================================
+     JAVASCRIPT
+============================================================== -->
+
+<script>
+
+    /* =========================================================
+       FRIEND SEARCH
+    ========================================================= */
+
+    const friendSearch = document.getElementById("friendSearch");
+    const globalSearch = document.getElementById("globalSearch");
+    const friendCards = document.querySelectorAll(".friend-card");
+    const emptyState = document.getElementById("emptyState");
+
+    function filterFriends(value) {
+
+        const searchTerm = value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        friendCards.forEach(card => {
+
+            const name = card.dataset.name.toLowerCase();
+            const game = card.dataset.game.toLowerCase();
+
+            const matches =
+                name.includes(searchTerm) ||
+                game.includes(searchTerm);
+
+            card.style.display = matches ? "flex" : "none";
+
+            if (matches) {
+                visibleCount++;
+            }
+
+        });
+
+        emptyState.style.display =
+            visibleCount === 0 ? "block" : "none";
+    }
+
+
+    friendSearch.addEventListener("input", function () {
+
+        filterFriends(this.value);
+
+    });
+
+
+    globalSearch.addEventListener("input", function () {
+
+        filterFriends(this.value);
+
+    });
+
+
+    /* =========================================================
+       FRIEND REQUESTS
+    ========================================================= */
+
+    function acceptRequest(button, name) {
+
+        const card = button.closest(".request-card");
+
+        card.style.transition = "0.3s ease";
+        card.style.opacity = "0";
+        card.style.transform = "translateX(20px)";
+
+        setTimeout(() => {
+
+            card.remove();
+
+            showToast(
+                `${name} is now your friend.`,
+                "success"
+            );
+
+        }, 300);
+    }
+
+
+    function declineRequest(button) {
+
+        const card = button.closest(".request-card");
+
+        card.style.transition = "0.3s ease";
+        card.style.opacity = "0";
+        card.style.transform = "translateX(-20px)";
+
+        setTimeout(() => {
+
+            card.remove();
+
+            showToast(
+                "Friend request declined.",
+                "info"
+            );
+
+        }, 300);
+    }
+
+
+    function showRequests() {
+
+        document
+            .querySelector('[data-tab="requests"]')
+            .click();
+
+    }
+
+
+    /* =========================================================
+       ADD FRIEND
+    ========================================================= */
+
+    function addFriend(button, name) {
+
+        button.disabled = true;
+
+        button.innerHTML =
+            '<i class="bi bi-check-lg"></i>';
+
+        showToast(
+            `Friend request sent to ${name}.`,
+            "success"
+        );
+
+    }
+
+
+    /* =========================================================
+       MESSAGE
+    ========================================================= */
+
+    function messageUser(name) {
+
+        showToast(
+            `Opening conversation with ${name}...`,
+            "info"
+        );
+
+    }
+
+
+    /* =========================================================
+       FIND GAMERS
+    ========================================================= */
+
+    function findGamers() {
+
+        document
+            .querySelector('[data-tab="gamers"]')
+            .click();
+
+    }
+
+
+    /* =========================================================
+       TABS
+    ========================================================= */
+
+    const tabs = document.querySelectorAll(".friends-tab");
+
+    tabs.forEach(tab => {
+
+        tab.addEventListener("click", function () {
+
+            tabs.forEach(item => {
+                item.classList.remove("active");
+            });
+
+            this.classList.add("active");
+
+            const tabType = this.dataset.tab;
+
+            handleTab(tabType);
+
+        });
+
+    });
+
+
+    function handleTab(tabType) {
+
+        switch (tabType) {
+
+            case "friends":
+
+                showToast(
+                    "Showing all friends.",
+                    "info"
+                );
+
+                break;
+
+            case "requests":
+
+                showToast(
+                    "Showing friend requests.",
+                    "info"
+                );
+
+                break;
+
+            case "sent":
+
+                showToast(
+                    "Showing sent requests.",
+                    "info"
+                );
+
+                break;
+
+            case "gamers":
+
+                showToast(
+                    "Opening gamer discovery.",
+                    "info"
+                );
+
+                break;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       TOAST
+    ========================================================= */
+
+    function showToast(message, type = "info") {
+
+        const toastContainer =
+            document.getElementById("toastContainer") ||
+            createToastContainer();
+
+        const toast = document.createElement("div");
+
+        toast.className =
+            "toast align-items-center border-0 show mb-2";
+
+        toast.setAttribute("role", "alert");
+
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close me-2 m-auto"
+                    data-bs-dismiss="toast"
+                ></button>
+            </div>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+
+            toast.remove();
+
+        }, 3000);
+
+    }
+
+
+    function createToastContainer() {
+
+        const container =
+            document.createElement("div");
+
+        container.id = "toastContainer";
+
+        container.style.position = "fixed";
+        container.style.bottom = "20px";
+        container.style.right = "20px";
+        container.style.zIndex = "9999";
+
+        document.body.appendChild(container);
+
+        return container;
+
+    }
+
+</script>
+
+</body>
+</html>

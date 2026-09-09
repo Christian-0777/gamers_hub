@@ -35,16 +35,20 @@ $headerAvatar = $avatar ?? appUrl('assets/icons/profile.png');
             <span>Ping: <strong id="currentPing">--</strong>ms</span>
         </span>
 
-        <button
-            class="dashboard-icon-btn position-relative"
-            type="button"
-            aria-label="Notifications"
-        >
-            <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
-            <span
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-                style="background:var(--dashboard-danger);width:9px;height:9px;padding:0"
-            ></span>
+        <div class="dashboard-notification-menu">
+            <button class="dashboard-icon-btn position-relative" id="dashboardNotificationTrigger" type="button" aria-label="Notifications" aria-controls="dashboardNotificationDropdown" aria-expanded="false" data-notification-api-url="<?= htmlspecialchars(appUrl('api/notifications.php'), ENT_QUOTES, 'UTF-8') ?>">
+                <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+                <span class="dashboard-notification-badge" id="dashboardNotificationBadge" hidden>0</span>
+            </button>
+            <div class="dashboard-notification-dropdown" id="dashboardNotificationDropdown" hidden>
+                <div class="dashboard-notification-heading"><strong>Notifications</strong><span id="dashboardNotificationCount">0 unread</span></div>
+                <div id="dashboardNotificationList"><div class="dashboard-notification-loading">Loading notifications...</div></div>
+                <a class="dashboard-notification-more" href="<?= htmlspecialchars(appUrl('notifications'), ENT_QUOTES, 'UTF-8') ?>">View more <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a>
+            </div>
+        </div>
+
+        <button class="dashboard-icon-btn dashboard-mobile-right-toggle" id="dashboardMobileRightSidebarToggle" type="button" aria-label="Open community sidebar" aria-controls="dashboardRightSidebar" aria-expanded="false">
+            <span class="material-symbols-rounded" aria-hidden="true">right_panel_open</span>
         </button>
 
         <div class="dashboard-account-menu">
@@ -76,3 +80,5 @@ $headerAvatar = $avatar ?? appUrl('assets/icons/profile.png');
         </div>
     </div>
 </header>
+
+<?php require __DIR__ . '/right_sidebar.php'; ?>
