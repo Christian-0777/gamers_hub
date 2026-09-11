@@ -9,7 +9,7 @@ function getPostMediaImages(PDO $pdo, int $postId): array
     $stmt = $pdo->prepare('
         SELECT media_url
         FROM post_media
-        WHERE post_id = :post_id AND media_type = "image"
+        WHERE post_id = :post_id AND media_type = \'image\'
         ORDER BY sort_order ASC, id ASC
     ');
     $stmt->execute(['post_id' => $postId]);
@@ -24,7 +24,7 @@ function getLatestPostComments(PDO $pdo, int $postId, int $limit = 2): array
         FROM comments c
         INNER JOIN users u ON u.id = c.user_id
         LEFT JOIN user_profiles up ON up.user_id = u.id
-        WHERE c.post_id = :post_id AND c.status = "published"
+        WHERE c.post_id = :post_id AND c.status = \'published\'
         ORDER BY c.created_at DESC
         LIMIT :limit
     ');
@@ -47,12 +47,12 @@ if (!function_exists('getUserPosts')) {
                 (
                     SELECT COUNT(*)
                     FROM post_reactions pr
-                    WHERE pr.post_id = p.id AND pr.reaction_type = "like"
+                    WHERE pr.post_id = p.id AND pr.reaction_type = \'like\'
                 ) AS like_count,
                 (
                     SELECT COUNT(*)
                     FROM comments c
-                    WHERE c.post_id = p.id AND c.status = "published"
+                    WHERE c.post_id = p.id AND c.status = \'published\'
                 ) AS comment_count,
                 (
                     SELECT COUNT(*)
@@ -61,8 +61,8 @@ if (!function_exists('getUserPosts')) {
                 ) AS share_count
             FROM posts p
             WHERE p.user_id = :user_id
-              AND p.visibility = "public"
-              AND p.status = "published"
+              AND p.visibility = \'public\'
+              AND p.status = \'published\'
             ORDER BY p.created_at DESC
             LIMIT :limit
         ');

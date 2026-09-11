@@ -49,7 +49,7 @@ $dashboardActivePage = 'friends';
 
     <div class="dashboard-main" id="dashboardMain">
         <?php require __DIR__ . '/../includes/header.php'; ?>
-        <main class="friends-main" data-api-url="<?= htmlspecialchars(appUrl('api/friends.php'), ENT_QUOTES, 'UTF-8') ?>">
+        <main class="friends-main" data-api-url="<?= htmlspecialchars(appUrl('api/friends.php'), ENT_QUOTES, 'UTF-8') ?>" data-message-url="<?= htmlspecialchars(appUrl('message'), ENT_QUOTES, 'UTF-8') ?>">
             <div class="friends-heading">
                 <div><h1>Friends</h1><p>Your gaming network</p></div>
                 <label class="friends-global-search"><span class="material-symbols-rounded" aria-hidden="true">search</span><input id="globalFriendSearch" type="search" placeholder="Search friends..." autocomplete="off"></label>
@@ -68,6 +68,6 @@ $dashboardActivePage = 'friends';
     </div>
     <script src="<?= htmlspecialchars(appUrl('assets/js/shared/layout_functions.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
     <script src="<?= htmlspecialchars(appUrl('assets/js/shared/coming_soon.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-    <script src="<?= htmlspecialchars(appUrl('assets/js/friends.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>
+    <script src="<?= htmlspecialchars(appUrl('assets/js/friends.js') . '?v=' . filemtime(__DIR__ . '/../assets/js/friends.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>
 </body>
 </html>

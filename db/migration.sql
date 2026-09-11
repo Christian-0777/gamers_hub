@@ -118,17 +118,17 @@ ALTER TABLE user_login_history
 -- ============================================================
 
 SELECT
-    'uploads/profile' AS profile_storage_dir,
-    'uploads/cover' AS cover_storage_dir,
-    'uploads/post' AS post_storage_dir,
+    'uploads/profile' AS profile_storage_path,
+    'uploads/cover' AS cover_storage_path,
+    'uploads/post' AS post_storage_path,
     'uploads/post/post_<username>_<post_id>' AS post_folder_pattern,
     'avatar_url / cover_url / media_url store the final public file path' AS storage_note;
 
 -- Application convention:
--- 1. Profile image files are stored under uploads/profile/
--- 2. Cover image files are stored under uploads/cover/
--- 3. Each post image batch is stored under uploads/post/post_<username>_<post_id>/
+-- 1. Profile image files are stored under the local uploads/profile/ path.
+-- 2. Cover image files are stored under the local uploads/cover/ path.
+-- 3. Each post image batch is stored under uploads/post/post_<username>_<post_id>/.
 -- 4. The saved DB values should point to the final uploaded path, for example:
---    uploads/profile/user_123.jpg
---    uploads/cover/user_123_cover.jpg
---    uploads/post/post_alex_42/image_1.jpg
+--    media/profile/profile_123.jpg
+--    media/cover/cover_123.jpg
+--    media/post/post_alex_42/image_1.jpg

@@ -40,16 +40,12 @@ $headerAvatar = $avatar ?? appUrl('assets/icons/profile.png');
                 <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
                 <span class="dashboard-notification-badge" id="dashboardNotificationBadge" hidden>0</span>
             </button>
-            <div class="dashboard-notification-dropdown" id="dashboardNotificationDropdown" hidden>
+            <div class="dashboard-notification-dropdown" id="dashboardNotificationDropdown" style="position:fixed;top:calc(var(--dashboard-topbar-h) + .65rem);right:1.5rem;" hidden>
                 <div class="dashboard-notification-heading"><strong>Notifications</strong><span id="dashboardNotificationCount">0 unread</span></div>
                 <div id="dashboardNotificationList"><div class="dashboard-notification-loading">Loading notifications...</div></div>
                 <a class="dashboard-notification-more" href="<?= htmlspecialchars(appUrl('notifications'), ENT_QUOTES, 'UTF-8') ?>">View more <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a>
             </div>
         </div>
-
-        <button class="dashboard-icon-btn dashboard-mobile-right-toggle" id="dashboardMobileRightSidebarToggle" type="button" aria-label="Open community sidebar" aria-controls="dashboardRightSidebar" aria-expanded="false">
-            <span class="material-symbols-rounded" aria-hidden="true">right_panel_open</span>
-        </button>
 
         <div class="dashboard-account-menu">
             <button

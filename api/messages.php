@@ -47,6 +47,7 @@ if (!$session->fetch()) {
 }
 
 $userId = (int) $_SESSION['user_id'];
+$defaultAvatar = appUrl('assets/icons/profile.png');
 $action = (string) ($_GET['action'] ?? $_POST['action'] ?? 'conversations');
 
 if ($action === 'ping') {
@@ -101,7 +102,7 @@ if ($action === 'conversations') {
         $conversations[] = [
             'id' => (int) $row['id'],
             'name' => $row['is_group'] ? ($row['title'] ?: 'Group conversation') : ($row['display_name'] ?: 'Gamer'),
-            'avatar' => $row['avatar_url'],
+            'avatar' => $row['avatar_url'] ?: $defaultAvatar,
             'status' => $row['is_group'] ? 'Group conversation' : ucfirst((string) ($row['online_status'] ?: 'offline')),
             'online' => $row['online_status'] === 'online',
             'preview' => $row['last_body'] ?: 'Start a conversation',
@@ -111,6 +112,92 @@ if ($action === 'conversations') {
     }
 
     messageResponse(['conversations' => $conversations]);
+}
+
+if ($action === 'open') {
+    $targetUserId = (int) ($_GET['target_user_id'] ?? $_POST['target_user_id'] ?? 0);
+    if ($targetUserId < 1 || $targetUserId === $userId) {
+        messageResponse(['error' => 'Choose another gamer.'], 422);
+    }
+
+    $targetStatement = $database->prepare(
+        'SELECT u.id, p.display_name, p.avatar_url, p.online_status
+         FROM users u
+         INNER JOIN user_profiles p ON p.user_id = u.id
+         WHERE u.id = :target_user_id AND u.status = \'active\' LIMIT 1'
+    );
+    $targetStatement->execute(['target_user_id' => $targetUserId]);
+    $target = $targetStatement->fetch();
+    if (!$target) {
+        messageResponse(['error' => 'Gamer not found.'], 404);
+    }
+
+    $existingStatement = $database->prepare(
+        'SELECT c.id
+         FROM conversations c
+         WHERE c.is_group = FALSE
+           AND EXISTS (
+               SELECT 1 FROM conversation_participants mine
+               WHERE mine.conversation_id = c.id AND mine.user_id = :user_id
+           )
+           AND EXISTS (
+               SELECT 1 FROM conversation_participants target
+               WHERE target.conversation_id = c.id AND target.user_id = :target_user_id
+           )
+         GROUP BY c.id
+         HAVING (SELECT COUNT(*) FROM conversation_participants participants
+                 WHERE participants.conversation_id = c.id) = 2
+         ORDER BY c.id DESC
+         LIMIT 1'
+    );
+    $existingStatement->execute(['user_id' => $userId, 'target_user_id' => $targetUserId]);
+    $conversationId = (int) $existingStatement->fetchColumn();
+
+    if (!$conversationId) {
+        $database->beginTransaction();
+        try {
+            $conversationStatement = $database->prepare(
+                'INSERT INTO conversations (is_group) VALUES (FALSE)'
+            );
+            $conversationStatement->execute();
+            $conversationId = (int) $database->lastInsertId();
+
+            $participantStatement = $database->prepare(
+                'INSERT INTO conversation_participants (conversation_id, user_id)
+                 VALUES (:conversation_id, :user_id), (:conversation_id_target, :target_user_id)'
+            );
+            $participantStatement->execute([
+                'conversation_id' => $conversationId,
+                'user_id' => $userId,
+                'conversation_id_target' => $conversationId,
+                'target_user_id' => $targetUserId,
+            ]);
+            $database->commit();
+        } catch (Throwable $exception) {
+            if ($database->inTransaction()) $database->rollBack();
+            throw $exception;
+        }
+    }
+
+    $conversationStatement = $database->prepare(
+        'SELECT updated_at FROM conversations WHERE id = :conversation_id LIMIT 1'
+    );
+    $conversationStatement->execute(['conversation_id' => $conversationId]);
+    $conversation = $conversationStatement->fetch();
+
+    messageResponse([
+        'conversation_id' => $conversationId,
+        'conversation' => [
+            'id' => $conversationId,
+            'name' => $target['display_name'] ?: 'Gamer',
+            'avatar' => $target['avatar_url'] ?: $defaultAvatar,
+            'status' => ucfirst((string) ($target['online_status'] ?: 'offline')),
+            'online' => $target['online_status'] === 'online',
+            'preview' => 'Start a conversation',
+            'updated_at' => $conversation['updated_at'],
+            'unread' => 0,
+        ],
+    ]);
 }
 
 $conversationId = (int) ($_GET['conversation_id'] ?? $_POST['conversation_id'] ?? 0);
@@ -125,7 +212,8 @@ if ($action === 'send') {
     }
 
     $statement = $database->prepare(
-        'INSERT INTO messages (conversation_id, sender_id, body) VALUES (:conversation_id, :sender_id, :body)'
+        'INSERT INTO messages (conversation_id, sender_id, body)
+         VALUES (:conversation_id, :sender_id, :body)'
     );
     $statement->execute(['conversation_id' => $conversationId, 'sender_id' => $userId, 'body' => $body]);
     $database->prepare('UPDATE conversations SET updated_at = NOW() WHERE id = :id')->execute(['id' => $conversationId]);

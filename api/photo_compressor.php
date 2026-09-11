@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/urls.php';
+require_once __DIR__ . '/../config/storage.php';
 
 function imageProcessorAvailable(): bool
 {
@@ -11,18 +12,6 @@ function imageProcessorAvailable(): bool
         || function_exists('imagecreatefrompng')
         || function_exists('imagecreatefromwebp')
         || function_exists('imagecreatefromgif');
-}
-
-function ensureUploadDirectory(string $relativePath): string
-{
-    $baseDir = __DIR__ . '/../' . ltrim($relativePath, '/');
-    $directory = dirname($baseDir);
-
-    if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
-        throw new RuntimeException('Unable to create upload directory: ' . $directory);
-    }
-
-    return $baseDir;
 }
 
 function generateUploadFilename(string $prefix, string $extension): string
@@ -158,7 +147,6 @@ function compressUploadedImage(array $file, string $storageDir, string $prefix):
         throw new RuntimeException('The uploaded image is empty.');
     }
 
-    $fileExt = strtolower(pathinfo((string) ($file['name'] ?? 'image.jpg'), PATHINFO_EXTENSION));
     $mimeType = mime_content_type($file['tmp_name']);
     $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
@@ -166,30 +154,26 @@ function compressUploadedImage(array $file, string $storageDir, string $prefix):
         throw new InvalidArgumentException('Unsupported image type. Please upload a JPG, PNG, WEBP, or GIF image.');
     }
 
-    $relativeDir = ltrim($storageDir, '/');
-    $targetDir = __DIR__ . '/../' . $relativeDir;
+    $targetDir = sys_get_temp_dir() . '/gamers_hub';
     if (!is_dir($targetDir) && !mkdir($targetDir, 0775, true) && !is_dir($targetDir)) {
-        throw new RuntimeException('Unable to create image storage folder.');
+        throw new RuntimeException('Unable to create temporary image folder.');
     }
 
     if ($sourceSize <= 5 * 1024 * 1024) {
-        $targetPath = $targetDir . '/' . generateUploadFilename($prefix, $mimeType === 'image/png' ? 'png' : ($mimeType === 'image/webp' ? 'webp' : ($mimeType === 'image/gif' ? 'gif' : 'jpg')));
+        $extension = $mimeType === 'image/png' ? 'png' : ($mimeType === 'image/webp' ? 'webp' : ($mimeType === 'image/gif' ? 'gif' : 'jpg'));
+        $filename = generateUploadFilename($prefix, $extension);
+        $targetPath = $targetDir . '/' . $filename;
         if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
             if (!copy($file['tmp_name'], $targetPath)) {
-                throw new RuntimeException('Unable to save the uploaded image.');
+                throw new RuntimeException('Unable to prepare the uploaded image.');
             }
         }
 
-        $normalizedTargetPath = str_replace('\\', '/', $targetPath);
-        $rootPath = str_replace('\\', '/', realpath(__DIR__ . '/..') ?: (__DIR__ . '/..'));
-        $relativeUrl = preg_replace('#^' . preg_quote($rootPath, '#') . '/?#', '', $normalizedTargetPath, 1);
-        $relativeUrl = ltrim((string) $relativeUrl, '/');
-
-        return [
-            'path' => $relativeUrl,
-            'url' => appUrl($relativeUrl),
-            'size_bytes' => filesize($targetPath) ?: $sourceSize,
-        ];
+        try {
+            return uploadToLocalStorage($targetPath, $storageDir, $filename, $mimeType);
+        } finally {
+            @unlink($targetPath);
+        }
     }
 
     $sourceImage = normalizeImageSource($file['tmp_name']);
@@ -335,14 +319,10 @@ function compressUploadedImage(array $file, string $storageDir, string $prefix):
         throw new RuntimeException('The uploaded image could not be compressed below the 5MB limit.');
     }
 
-    $rootPath = str_replace('\\', '/', realpath(__DIR__ . '/..') ?: (__DIR__ . '/..'));
-    $normalizedFinalPath = str_replace('\\', '/', $finalPath);
-    $relativeUrl = preg_replace('#^' . preg_quote($rootPath, '#') . '/?#', '', $normalizedFinalPath, 1);
-    $relativeUrl = ltrim((string) $relativeUrl, '/');
-
-    return [
-        'path' => $relativeUrl,
-        'url' => appUrl($relativeUrl),
-        'size_bytes' => $finalSize,
-    ];
+    $filename = basename($finalPath);
+    try {
+        return uploadToLocalStorage($finalPath, $storageDir, $filename, $mimeType);
+    } finally {
+        @unlink($finalPath);
+    }
 }

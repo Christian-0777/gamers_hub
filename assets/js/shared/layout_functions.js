@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const notificationApiUrl = notificationTrigger?.dataset.notificationApiUrl || '';
   const rightSidebar = document.querySelector('#dashboardRightSidebar');
   const rightSidebarToggle = document.querySelector('#dashboardRightSidebarToggle');
-  const mobileRightSidebarToggle = document.querySelector('#dashboardMobileRightSidebarToggle');
 
   const showToast = (message) => {
     if (!toastElement) return;
@@ -113,15 +112,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyRightSidebarState();
   rightSidebarToggle?.addEventListener('click', () => {
-    if (isMobile()) return;
+    if (isMobile()) {
+      const isOpen = rightSidebar?.classList.toggle('show') || false;
+      rightSidebarToggle.setAttribute('aria-expanded', String(isOpen));
+      rightSidebarToggle.setAttribute('aria-label', isOpen ? 'Close community sidebar' : 'Open community sidebar');
+      rightSidebarToggle.querySelector('.material-symbols-rounded').textContent = isOpen ? 'right_panel_close' : 'right_panel_open';
+      return;
+    }
+
     const collapsed = document.body.classList.toggle('right-sidebar-collapsed');
     rightSidebarToggle.setAttribute('aria-expanded', String(!collapsed));
     rightSidebarToggle.setAttribute('aria-label', collapsed ? 'Expand community sidebar' : 'Collapse community sidebar');
     rightSidebarToggle.querySelector('.material-symbols-rounded').textContent = collapsed ? 'right_panel_open' : 'right_panel_close';
-  });
-  mobileRightSidebarToggle?.addEventListener('click', () => {
-    rightSidebar?.classList.toggle('show');
-    mobileRightSidebarToggle.setAttribute('aria-expanded', String(rightSidebar?.classList.contains('show')));
   });
   window.addEventListener('resize', () => {
     if (isMobile()) {

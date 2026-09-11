@@ -15,7 +15,6 @@ function db(): PDO
 	$name = env('DB_NAME', 'gamers_hub');
 	$user = env('DB_USER', 'root');
 	$password = env('DB_PASSWORD', '');
-
 	$connection = new PDO(
 		"mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4",
 		$user,

@@ -1,0 +1,2802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SocialFeed - News Feed</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        /* =========================================================
+           ROOT VARIABLES
+        ========================================================= */
+
+        :root {
+            --primary: #1877f2;
+            --primary-dark: #0d65d9;
+
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --surface-hover: #f2f2f2;
+
+            --text: #050505;
+            --muted: #65676b;
+            --border: #dddfe2;
+
+            --sidebar-width: 280px;
+            --right-sidebar-width: 300px;
+
+            --radius: 12px;
+        }
+
+
+        /* =========================================================
+           GLOBAL
+        ========================================================= */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+
+        /* =========================================================
+           TOP NAVBAR
+        ========================================================= */
+
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+
+            height: 64px;
+
+            background: var(--surface);
+
+            border-bottom: 1px solid var(--border);
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 16px;
+
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            min-width: 280px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+
+            border-radius: 50%;
+
+            background: var(--primary);
+
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 700;
+
+            color: var(--primary);
+        }
+
+
+        /* =========================================================
+           SEARCH
+        ========================================================= */
+
+        .search-box {
+            width: 300px;
+            height: 42px;
+
+            background: var(--bg);
+
+            border-radius: 22px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 0 15px;
+
+            gap: 9px;
+        }
+
+        .search-box i {
+            color: var(--muted);
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+
+            background: transparent;
+
+            width: 100%;
+
+            font-size: 14px;
+        }
+
+
+        /* =========================================================
+           NAV ACTIONS
+        ========================================================= */
+
+        .top-actions {
+            margin-left: auto;
+
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+        }
+
+        .top-action {
+            width: 42px;
+            height: 42px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: var(--bg);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 19px;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .top-action:hover {
+            background: #e4e6eb;
+        }
+
+        .profile-mini {
+            width: 40px;
+            height: 40px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            cursor: pointer;
+        }
+
+
+        /* =========================================================
+           MAIN LAYOUT
+        ========================================================= */
+
+        .page-layout {
+            display: grid;
+
+            grid-template-columns:
+                var(--sidebar-width)
+                minmax(500px, 680px)
+                var(--right-sidebar-width);
+
+            justify-content: center;
+
+            gap: 24px;
+
+            padding-top: 88px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+
+        /* =========================================================
+           LEFT SIDEBAR
+        ========================================================= */
+
+        .left-sidebar {
+            position: sticky;
+
+            top: 84px;
+
+            height: calc(100vh - 100px);
+
+            overflow-y: auto;
+
+            padding-bottom: 20px;
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 10px;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+        }
+
+        .sidebar-profile:hover {
+            background: #e4e6eb;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            flex-shrink: 0;
+        }
+
+        .avatar-lg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .sidebar-profile-name {
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            margin-top: 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+
+            gap: 15px;
+
+            padding: 11px 10px;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            color: #242526;
+
+            font-size: 15px;
+
+            font-weight: 500;
+        }
+
+        .sidebar-item:hover {
+            background: #e4e6eb;
+        }
+
+        .sidebar-item i {
+            width: 28px;
+
+            color: var(--primary);
+
+            font-size: 21px;
+
+            text-align: center;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+
+            background: var(--border);
+
+            margin: 12px 10px;
+        }
+
+        .sidebar-heading {
+            color: var(--muted);
+
+            font-size: 16px;
+
+            font-weight: 600;
+
+            padding: 8px 10px;
+        }
+
+
+        /* =========================================================
+           FEED
+        ========================================================= */
+
+        .feed {
+            width: 100%;
+            min-width: 0;
+        }
+
+
+        /* =========================================================
+           STORIES
+        ========================================================= */
+
+        .stories-wrapper {
+            position: relative;
+        }
+
+        .stories {
+            display: flex;
+
+            gap: 10px;
+
+            overflow-x: auto;
+
+            scrollbar-width: none;
+
+            padding-bottom: 4px;
+        }
+
+        .stories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .story {
+            position: relative;
+
+            min-width: 112px;
+            height: 190px;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            background: #222;
+
+            cursor: pointer;
+
+            flex-shrink: 0;
+        }
+
+        .story-image {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+            transition: transform 0.3s;
+        }
+
+        .story:hover .story-image {
+            transform: scale(1.04);
+        }
+
+        .story::after {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    transparent 45%,
+                    rgba(0, 0, 0, 0.8)
+                );
+        }
+
+        .story-avatar {
+            position: absolute;
+
+            top: 10px;
+            left: 10px;
+
+            width: 38px;
+            height: 38px;
+
+            border-radius: 50%;
+
+            border: 3px solid var(--primary);
+
+            object-fit: cover;
+
+            z-index: 2;
+        }
+
+        .story-name {
+            position: absolute;
+
+            bottom: 10px;
+            left: 10px;
+            right: 8px;
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            z-index: 2;
+        }
+
+        .create-story {
+            background: white;
+        }
+
+        .create-story::after {
+            display: none;
+        }
+
+        .create-story-image {
+            height: 135px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #dbeafe,
+                    #93c5fd
+                );
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .create-story-image img {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        .create-story-button {
+            position: absolute;
+
+            top: 116px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 40px;
+            height: 40px;
+
+            border-radius: 50%;
+
+            border: 4px solid white;
+
+            background: var(--primary);
+
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            z-index: 3;
+
+            font-size: 20px;
+        }
+
+        .create-story-label {
+            position: absolute;
+
+            bottom: 12px;
+
+            left: 0;
+            right: 0;
+
+            text-align: center;
+
+            color: #242526;
+
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+
+        /* =========================================================
+           CARD
+        ========================================================= */
+
+        .card-social {
+            background: var(--surface);
+
+            border-radius: var(--radius);
+
+            border: 1px solid rgba(0, 0, 0, 0.05);
+
+            box-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 16px;
+
+            overflow: hidden;
+        }
+
+
+        /* =========================================================
+           CREATE POST
+        ========================================================= */
+
+        .composer {
+            padding: 14px 16px;
+        }
+
+        .composer-top {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+        .composer-input {
+            flex: 1;
+
+            background: var(--bg);
+
+            border: none;
+
+            border-radius: 22px;
+
+            padding: 11px 16px;
+
+            outline: none;
+
+            cursor: pointer;
+
+            color: var(--muted);
+
+            transition: 0.2s;
+        }
+
+        .composer-input:hover {
+            background: #e4e6eb;
+        }
+
+        .composer-divider {
+            height: 1px;
+
+            background: var(--border);
+
+            margin: 13px 0;
+        }
+
+        .composer-actions {
+            display: flex;
+        }
+
+        .composer-action {
+            flex: 1;
+
+            border: none;
+
+            background: transparent;
+
+            border-radius: 8px;
+
+            padding: 8px;
+
+            color: var(--muted);
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 7px;
+        }
+
+        .composer-action:hover {
+            background: var(--surface-hover);
+        }
+
+        .composer-action i {
+            font-size: 21px;
+        }
+
+        .video-icon {
+            color: #f3425f;
+        }
+
+        .photo-icon {
+            color: #45bd62;
+        }
+
+        .feeling-icon {
+            color: #f7b928;
+        }
+
+
+        /* =========================================================
+           POST HEADER
+        ========================================================= */
+
+        .post-header {
+            display: flex;
+
+            align-items: center;
+
+            padding: 14px 16px 8px;
+        }
+
+        .post-user {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            flex: 1;
+        }
+
+        .post-user-info {
+            line-height: 1.2;
+        }
+
+        .post-author {
+            font-weight: 600;
+
+            font-size: 15px;
+        }
+
+        .post-meta {
+            display: flex;
+
+            align-items: center;
+
+            gap: 4px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+
+            margin-top: 4px;
+        }
+
+        .post-menu {
+            width: 36px;
+            height: 36px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: transparent;
+
+            color: var(--muted);
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+        }
+
+        .post-menu:hover {
+            background: var(--bg);
+        }
+
+
+        /* =========================================================
+           POST BODY
+        ========================================================= */
+
+        .post-body {
+            padding: 4px 16px 12px;
+        }
+
+        .post-text {
+            font-size: 15px;
+
+            line-height: 1.45;
+
+            margin: 0;
+
+            white-space: pre-line;
+        }
+
+        .post-image {
+            width: 100%;
+
+            max-height: 600px;
+
+            object-fit: cover;
+
+            display: block;
+        }
+
+
+        /* =========================================================
+           POST STATS
+        ========================================================= */
+
+        .post-stats {
+            display: flex;
+
+            justify-content: space-between;
+
+            padding: 9px 16px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+        }
+
+        .reaction-count {
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+        }
+
+        .reaction-icon {
+            width: 20px;
+            height: 20px;
+
+            border-radius: 50%;
+
+            background: var(--primary);
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-size: 11px;
+        }
+
+
+        /* =========================================================
+           POST ACTIONS
+        ========================================================= */
+
+        .post-actions {
+            display: flex;
+
+            margin: 0 12px;
+
+            border-top: 1px solid var(--border);
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .post-action {
+            flex: 1;
+
+            border: none;
+
+            background: transparent;
+
+            padding: 9px;
+
+            border-radius: 6px;
+
+            color: var(--muted);
+
+            font-weight: 600;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 7px;
+
+            cursor: pointer;
+        }
+
+        .post-action:hover {
+            background: var(--bg);
+        }
+
+        .post-action.liked {
+            color: var(--primary);
+        }
+
+        .post-action i {
+            font-size: 19px;
+        }
+
+
+        /* =========================================================
+           COMMENTS
+        ========================================================= */
+
+        .comments {
+            display: none;
+
+            padding: 10px 16px 14px;
+        }
+
+        .comments.show {
+            display: block;
+        }
+
+        .comment {
+            display: flex;
+
+            gap: 8px;
+
+            margin-bottom: 10px;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+        }
+
+        .comment-content {
+            background: var(--bg);
+
+            border-radius: 14px;
+
+            padding: 7px 11px;
+        }
+
+        .comment-author {
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+        .comment-text {
+            font-size: 13px;
+
+            margin: 2px 0 0;
+        }
+
+        .comment-form {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+        .comment-input {
+            flex: 1;
+
+            border: none;
+
+            outline: none;
+
+            background: var(--bg);
+
+            border-radius: 18px;
+
+            padding: 9px 13px;
+
+            font-size: 13px;
+        }
+
+        .comment-submit {
+            border: none;
+
+            width: 35px;
+            height: 35px;
+
+            border-radius: 50%;
+
+            background: var(--primary);
+
+            color: white;
+        }
+
+
+        /* =========================================================
+           RIGHT SIDEBAR
+        ========================================================= */
+
+        .right-sidebar {
+            position: sticky;
+
+            top: 84px;
+
+            height: calc(100vh - 100px);
+
+            overflow-y: auto;
+        }
+
+        .right-section {
+            margin-bottom: 22px;
+        }
+
+        .right-heading {
+            color: var(--muted);
+
+            font-size: 16px;
+
+            font-weight: 600;
+
+            margin-bottom: 8px;
+
+            padding-left: 5px;
+        }
+
+        .contact {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 8px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+        }
+
+        .contact:hover {
+            background: #e4e6eb;
+        }
+
+        .contact-avatar-wrapper {
+            position: relative;
+        }
+
+        .online-dot {
+            position: absolute;
+
+            right: 0;
+            bottom: 1px;
+
+            width: 11px;
+            height: 11px;
+
+            border-radius: 50%;
+
+            background: #31a24c;
+
+            border: 2px solid white;
+        }
+
+        .contact-name {
+            font-size: 14px;
+
+            font-weight: 500;
+        }
+
+
+        /* =========================================================
+           MODAL
+        ========================================================= */
+
+        .modal-content {
+            border: none;
+
+            border-radius: 14px;
+
+            overflow: hidden;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border);
+
+            justify-content: center;
+
+            position: relative;
+        }
+
+        .modal-header .btn-close {
+            position: absolute;
+
+            right: 15px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+
+            font-weight: 700;
+        }
+
+        .post-modal-user {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 15px;
+        }
+
+        .post-modal textarea {
+            width: 100%;
+
+            border: none;
+
+            resize: none;
+
+            outline: none;
+
+            font-size: 18px;
+
+            min-height: 130px;
+        }
+
+        .modal-options {
+            border: 1px solid var(--border);
+
+            border-radius: 10px;
+
+            padding: 10px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            margin-bottom: 15px;
+        }
+
+        .modal-option {
+            border: none;
+
+            background: transparent;
+
+            width: 40px;
+            height: 40px;
+
+            border-radius: 50%;
+
+            font-size: 21px;
+        }
+
+        .modal-option:hover {
+            background: var(--bg);
+        }
+
+        .publish-btn {
+            width: 100%;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background: var(--primary);
+
+            color: white;
+
+            padding: 10px;
+
+            font-weight: 600;
+        }
+
+        .publish-btn:hover {
+            background: var(--primary-dark);
+        }
+
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 1200px) {
+
+            .page-layout {
+                grid-template-columns:
+                    220px
+                    minmax(450px, 680px);
+
+                max-width: 950px;
+
+                margin: auto;
+            }
+
+            .right-sidebar {
+                display: none;
+            }
+
+            .brand {
+                min-width: auto;
+            }
+
+            .search-box {
+                width: 240px;
+            }
+        }
+
+
+        @media (max-width: 850px) {
+
+            .page-layout {
+                display: block;
+
+                max-width: 680px;
+
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .left-sidebar {
+                display: none;
+            }
+
+            .feed {
+                width: 100%;
+            }
+
+            .brand-name {
+                display: none;
+            }
+
+            .brand {
+                min-width: 45px;
+            }
+
+            .search-box {
+                width: 220px;
+            }
+        }
+
+
+        @media (max-width: 600px) {
+
+            .topbar {
+                height: 58px;
+
+                padding: 0 10px;
+            }
+
+            .search-box {
+                flex: 1;
+
+                width: auto;
+
+                margin-left: 8px;
+            }
+
+            .top-action:nth-child(1),
+            .top-action:nth-child(2) {
+                display: none;
+            }
+
+            .profile-mini {
+                display: none;
+            }
+
+            .page-layout {
+                padding-top: 68px;
+            }
+
+            .story {
+                min-width: 100px;
+
+                height: 170px;
+            }
+
+            .composer-actions {
+                gap: 3px;
+            }
+
+            .composer-action span {
+                display: none;
+            }
+
+            .post-action span {
+                font-size: 12px;
+            }
+
+            .post-action {
+                padding: 9px 4px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+
+<!-- =============================================================
+     TOP NAVBAR
+============================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-logo">
+            f
+        </div>
+
+        <div class="brand-name">
+            SocialFeed
+        </div>
+
+    </div>
+
+
+    <div class="search-box">
+
+        <i class="bi bi-search"></i>
+
+        <input
+            type="text"
+            placeholder="Search SocialFeed"
+            id="searchInput"
+        >
+
+    </div>
+
+
+    <div class="top-actions">
+
+        <button
+            class="top-action"
+            title="Home"
+        >
+            <i class="bi bi-house-fill"></i>
+        </button>
+
+        <button
+            class="top-action"
+            title="Messages"
+        >
+            <i class="bi bi-messenger"></i>
+        </button>
+
+        <button
+            class="top-action"
+            title="Notifications"
+        >
+            <i class="bi bi-bell-fill"></i>
+        </button>
+
+        <img
+            class="profile-mini"
+            src="https://i.pravatar.cc/100?img=12"
+            alt="Profile"
+        >
+
+    </div>
+
+</header>
+
+
+
+<!-- =============================================================
+     PAGE LAYOUT
+============================================================= -->
+
+<main class="page-layout">
+
+
+    
+
+
+
+    <!-- =========================================================
+         MAIN FEED
+    ========================================================= -->
+
+    <section class="feed">
+
+
+        <!-- =====================================================
+             STORIES
+        ===================================================== -->
+
+        <div class="stories-wrapper mb-3">
+
+            <div class="stories">
+
+
+                <!-- CREATE STORY -->
+
+                <div class="story create-story">
+
+                    <div class="create-story-image">
+
+                        <img
+                            src="https://i.pravatar.cc/300?img=12"
+                            alt="Profile"
+                        >
+
+                    </div>
+
+                    <div class="create-story-button">
+                        <i class="bi bi-plus"></i>
+                    </div>
+
+                    <div class="create-story-label">
+                        Create story
+                    </div>
+
+                </div>
+
+
+                <!-- STORY 1 -->
+
+                <div class="story">
+
+                    <img
+                        class="story-image"
+                        src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=400&q=80"
+                        alt="Gaming"
+                    >
+
+                    <img
+                        class="story-avatar"
+                        src="https://i.pravatar.cc/100?img=11"
+                        alt="Alex"
+                    >
+
+                    <div class="story-name">
+                        Alex Santos
+                    </div>
+
+                </div>
+
+
+                <!-- STORY 2 -->
+
+                <div class="story">
+
+                    <img
+                        class="story-image"
+                        src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80"
+                        alt="Gaming"
+                    >
+
+                    <img
+                        class="story-avatar"
+                        src="https://i.pravatar.cc/100?img=32"
+                        alt="Maya"
+                    >
+
+                    <div class="story-name">
+                        Maya Chen
+                    </div>
+
+                </div>
+
+
+                <!-- STORY 3 -->
+
+                <div class="story">
+
+                    <img
+                        class="story-image"
+                        src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=400&q=80"
+                        alt="Game"
+                    >
+
+                    <img
+                        class="story-avatar"
+                        src="https://i.pravatar.cc/100?img=15"
+                        alt="Daniel"
+                    >
+
+                    <div class="story-name">
+                        Daniel Cruz
+                    </div>
+
+                </div>
+
+
+                <!-- STORY 4 -->
+
+                <div class="story">
+
+                    <img
+                        class="story-image"
+                        src="https://images.unsplash.com/photo-1603481546238-487240415921?auto=format&fit=crop&w=400&q=80"
+                        alt="Computer"
+                    >
+
+                    <img
+                        class="story-avatar"
+                        src="https://i.pravatar.cc/100?img=44"
+                        alt="Kevin"
+                    >
+
+                    <div class="story-name">
+                        Kevin Lee
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             CREATE POST
+        ===================================================== -->
+
+        <div class="card-social composer">
+
+            <div class="composer-top">
+
+                <img
+                    class="avatar"
+                    src="https://i.pravatar.cc/100?img=12"
+                    alt="Christian"
+                >
+
+                <button
+                    class="composer-input text-start"
+                    data-bs-toggle="modal"
+                    data-bs-target="#createPostModal"
+                >
+                    What's on your mind, Christian?
+                </button>
+
+            </div>
+
+
+            <div class="composer-divider"></div>
+
+
+            <div class="composer-actions">
+
+                <button class="composer-action">
+
+                    <i class="bi bi-camera-video-fill video-icon"></i>
+
+                    <span>Live video</span>
+
+                </button>
+
+
+                <button
+                    class="composer-action"
+                    id="photoComposerButton"
+                >
+
+                    <i class="bi bi-images photo-icon"></i>
+
+                    <span>Photo/video</span>
+
+                </button>
+
+
+                <button class="composer-action">
+
+                    <i class="bi bi-emoji-smile-fill feeling-icon"></i>
+
+                    <span>Feeling/activity</span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             POST 1
+        ===================================================== -->
+
+        <article
+            class="card-social post"
+            data-author="Maya Chen"
+        >
+
+            <header class="post-header">
+
+                <div class="post-user">
+
+                    <img
+                        class="avatar"
+                        src="https://i.pravatar.cc/100?img=32"
+                        alt="Maya"
+                    >
+
+                    <div class="post-user-info">
+
+                        <div class="post-author">
+                            Maya Chen
+                        </div>
+
+                        <div class="post-meta">
+
+                            <span>2 hrs</span>
+
+                            <span>·</span>
+
+                            <i class="bi bi-globe-americas"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <button class="post-menu">
+
+                    <i class="bi bi-three-dots"></i>
+
+                </button>
+
+            </header>
+
+
+            <div class="post-body">
+
+                <p class="post-text">
+Just finished building my new gaming setup! 🎮🔥
+
+Finally upgraded the monitor and cleaned up the cable management.
+                </p>
+
+            </div>
+
+
+            <img
+                class="post-image"
+                src="https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1000&q=85"
+                alt="Gaming setup"
+            >
+
+
+            <div class="post-stats">
+
+                <div class="reaction-count">
+
+                    <span class="reaction-icon">
+                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                    </span>
+
+                    <span class="like-count">
+                        128
+                    </span>
+
+                </div>
+
+                <div>
+                    <span>24 comments</span>
+                    &nbsp;
+                    <span>8 shares</span>
+                </div>
+
+            </div>
+
+
+            <div class="post-actions">
+
+                <button class="post-action like-button">
+
+                    <i class="bi bi-hand-thumbs-up"></i>
+
+                    <span>Like</span>
+
+                </button>
+
+                <button class="post-action comment-button">
+
+                    <i class="bi bi-chat"></i>
+
+                    <span>Comment</span>
+
+                </button>
+
+                <button class="post-action">
+
+                    <i class="bi bi-share"></i>
+
+                    <span>Share</span>
+
+                </button>
+
+            </div>
+
+
+            <div class="comments">
+
+                <div class="comment">
+
+                    <img
+                        class="comment-avatar"
+                        src="https://i.pravatar.cc/100?img=14"
+                        alt="Commenter"
+                    >
+
+                    <div class="comment-content">
+
+                        <div class="comment-author">
+                            John Reyes
+                        </div>
+
+                        <p class="comment-text">
+                            That setup looks amazing! 🔥
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <form class="comment-form">
+
+                    <img
+                        class="comment-avatar"
+                        src="https://i.pravatar.cc/100?img=12"
+                        alt="You"
+                    >
+
+                    <input
+                        type="text"
+                        class="comment-input"
+                        placeholder="Write a comment..."
+                    >
+
+                    <button class="comment-submit">
+
+                        <i class="bi bi-send-fill"></i>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- =====================================================
+             POST 2
+        ===================================================== -->
+
+        <article
+            class="card-social post"
+            data-author="Alex Santos"
+        >
+
+            <header class="post-header">
+
+                <div class="post-user">
+
+                    <img
+                        class="avatar"
+                        src="https://i.pravatar.cc/100?img=11"
+                        alt="Alex"
+                    >
+
+                    <div class="post-user-info">
+
+                        <div class="post-author">
+                            Alex Santos
+                        </div>
+
+                        <div class="post-meta">
+
+                            <span>5 hrs</span>
+
+                            <span>·</span>
+
+                            <i class="bi bi-people-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <button class="post-menu">
+
+                    <i class="bi bi-three-dots"></i>
+
+                </button>
+
+            </header>
+
+
+            <div class="post-body">
+
+                <p class="post-text">
+Anyone up for a gaming session tonight? 🎮
+
+Looking for players for some Valorant or CS2.
+                </p>
+
+            </div>
+
+
+            <div class="post-stats">
+
+                <div class="reaction-count">
+
+                    <span class="reaction-icon">
+                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                    </span>
+
+                    <span class="like-count">
+                        46
+                    </span>
+
+                </div>
+
+                <div>
+                    <span>12 comments</span>
+                    &nbsp;
+                    <span>3 shares</span>
+                </div>
+
+            </div>
+
+
+            <div class="post-actions">
+
+                <button class="post-action like-button">
+
+                    <i class="bi bi-hand-thumbs-up"></i>
+
+                    <span>Like</span>
+
+                </button>
+
+                <button class="post-action comment-button">
+
+                    <i class="bi bi-chat"></i>
+
+                    <span>Comment</span>
+
+                </button>
+
+                <button class="post-action">
+
+                    <i class="bi bi-share"></i>
+
+                    <span>Share</span>
+
+                </button>
+
+            </div>
+
+
+            <div class="comments">
+
+                <form class="comment-form">
+
+                    <img
+                        class="comment-avatar"
+                        src="https://i.pravatar.cc/100?img=12"
+                        alt="You"
+                    >
+
+                    <input
+                        type="text"
+                        class="comment-input"
+                        placeholder="Write a comment..."
+                    >
+
+                    <button class="comment-submit">
+
+                        <i class="bi bi-send-fill"></i>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- =====================================================
+             POST 3
+        ===================================================== -->
+
+        <article
+            class="card-social post"
+            data-author="Daniel Cruz"
+        >
+
+            <header class="post-header">
+
+                <div class="post-user">
+
+                    <img
+                        class="avatar"
+                        src="https://i.pravatar.cc/100?img=15"
+                        alt="Daniel"
+                    >
+
+                    <div class="post-user-info">
+
+                        <div class="post-author">
+                            Daniel Cruz
+                        </div>
+
+                        <div class="post-meta">
+
+                            <span>Yesterday</span>
+
+                            <span>·</span>
+
+                            <i class="bi bi-globe-americas"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <button class="post-menu">
+
+                    <i class="bi bi-three-dots"></i>
+
+                </button>
+
+            </header>
+
+
+            <div class="post-body">
+
+                <p class="post-text">
+Sometimes the best way to solve a programming problem is to step away from the keyboard for a while. ☕💻
+                </p>
+
+            </div>
+
+
+            <div class="post-stats">
+
+                <div class="reaction-count">
+
+                    <span class="reaction-icon">
+                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                    </span>
+
+                    <span class="like-count">
+                        73
+                    </span>
+
+                </div>
+
+                <div>
+                    <span>8 comments</span>
+                    &nbsp;
+                    <span>2 shares</span>
+                </div>
+
+            </div>
+
+
+            <div class="post-actions">
+
+                <button class="post-action like-button">
+
+                    <i class="bi bi-hand-thumbs-up"></i>
+
+                    <span>Like</span>
+
+                </button>
+
+                <button class="post-action comment-button">
+
+                    <i class="bi bi-chat"></i>
+
+                    <span>Comment</span>
+
+                </button>
+
+                <button class="post-action">
+
+                    <i class="bi bi-share"></i>
+
+                    <span>Share</span>
+
+                </button>
+
+            </div>
+
+
+            <div class="comments">
+
+                <form class="comment-form">
+
+                    <img
+                        class="comment-avatar"
+                        src="https://i.pravatar.cc/100?img=12"
+                        alt="You"
+                    >
+
+                    <input
+                        type="text"
+                        class="comment-input"
+                        placeholder="Write a comment..."
+                    >
+
+                    <button class="comment-submit">
+
+                        <i class="bi bi-send-fill"></i>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </article>
+
+
+    </section>
+
+
+
+   
+
+
+<!-- =============================================================
+     CREATE POST MODAL
+============================================================= -->
+
+<div
+    class="modal fade"
+    id="createPostModal"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Create post
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+
+            <div class="modal-body post-modal">
+
+                <div class="post-modal-user">
+
+                    <img
+                        class="avatar"
+                        src="https://i.pravatar.cc/100?img=12"
+                        alt="Christian"
+                    >
+
+                    <div>
+
+                        <strong>
+                            Christian Calderon
+                        </strong>
+
+                        <div>
+
+                            <button
+                                class="btn btn-sm btn-light rounded-pill"
+                            >
+                                <i class="bi bi-globe-americas"></i>
+                                Public
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <textarea
+                    id="postContent"
+                    placeholder="What's on your mind?"
+                ></textarea>
+
+
+                <div class="modal-options">
+
+                    <strong>
+                        Add to your post
+                    </strong>
+
+                    <div>
+
+                        <button class="modal-option text-danger">
+
+                            <i class="bi bi-camera-video-fill"></i>
+
+                        </button>
+
+                        <button class="modal-option text-success">
+
+                            <i class="bi bi-images"></i>
+
+                        </button>
+
+                        <button class="modal-option text-warning">
+
+                            <i class="bi bi-emoji-smile-fill"></i>
+
+                        </button>
+
+                        <button class="modal-option text-primary">
+
+                            <i class="bi bi-geo-alt-fill"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="publish-btn"
+                    id="publishPost"
+                >
+                    Post
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =============================================================
+     BOOTSTRAP JS
+============================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+></script>
+
+
+
+<script>
+
+    /* =========================================================
+       LIKE BUTTON
+    ========================================================= */
+
+    document.querySelectorAll(".like-button").forEach(button => {
+
+        button.addEventListener("click", function () {
+
+            const post = this.closest(".post");
+
+            const countElement =
+                post.querySelector(".like-count");
+
+            let count =
+                parseInt(countElement.textContent);
+
+            const icon =
+                this.querySelector("i");
+
+            if (this.classList.contains("liked")) {
+
+                this.classList.remove("liked");
+
+                icon.classList.remove(
+                    "bi-hand-thumbs-up-fill"
+                );
+
+                icon.classList.add(
+                    "bi-hand-thumbs-up"
+                );
+
+                count--;
+
+            } else {
+
+                this.classList.add("liked");
+
+                icon.classList.remove(
+                    "bi-hand-thumbs-up"
+                );
+
+                icon.classList.add(
+                    "bi-hand-thumbs-up-fill"
+                );
+
+                count++;
+
+            }
+
+            countElement.textContent = count;
+
+        });
+
+    });
+
+
+    /* =========================================================
+       COMMENT TOGGLE
+    ========================================================= */
+
+    document.querySelectorAll(".comment-button").forEach(button => {
+
+        button.addEventListener("click", function () {
+
+            const post =
+                this.closest(".post");
+
+            const comments =
+                post.querySelector(".comments");
+
+            comments.classList.toggle("show");
+
+            if (comments.classList.contains("show")) {
+
+                const input =
+                    comments.querySelector(".comment-input");
+
+                if (input) {
+                    input.focus();
+                }
+
+            }
+
+        });
+
+    });
+
+
+    /* =========================================================
+       ADD COMMENT
+    ========================================================= */
+
+    document.querySelectorAll(".comment-form").forEach(form => {
+
+        form.addEventListener("submit", function (event) {
+
+            event.preventDefault();
+
+            const input =
+                this.querySelector(".comment-input");
+
+            const text =
+                input.value.trim();
+
+            if (!text) {
+                return;
+            }
+
+            const comments =
+                this.closest(".comments");
+
+            const comment =
+                document.createElement("div");
+
+            comment.className = "comment";
+
+            comment.innerHTML = `
+                <img
+                    class="comment-avatar"
+                    src="https://i.pravatar.cc/100?img=12"
+                    alt="You"
+                >
+
+                <div class="comment-content">
+
+                    <div class="comment-author">
+                        Christian Calderon
+                    </div>
+
+                    <p class="comment-text">
+                        ${escapeHtml(text)}
+                    </p>
+
+                </div>
+            `;
+
+            comments.insertBefore(
+                comment,
+                this
+            );
+
+            input.value = "";
+
+        });
+
+    });
+
+
+    /* =========================================================
+       SHARE BUTTON
+    ========================================================= */
+
+    document.querySelectorAll(".post-action").forEach(button => {
+
+        if (
+            button.querySelector(".bi-share")
+        ) {
+
+            button.addEventListener("click", function () {
+
+                const post =
+                    this.closest(".post");
+
+                const author =
+                    post.querySelector(".post-author")
+                        .textContent
+                        .trim();
+
+                if (
+                    navigator.clipboard
+                ) {
+
+                    navigator.clipboard.writeText(
+                        `Check out ${author}'s post on SocialFeed.`
+                    );
+
+                }
+
+                const original =
+                    this.innerHTML;
+
+                this.innerHTML = `
+                    <i class="bi bi-check-lg"></i>
+                    <span>Shared</span>
+                `;
+
+                setTimeout(() => {
+
+                    this.innerHTML =
+                        original;
+
+                }, 1500);
+
+            });
+
+        }
+
+    });
+
+
+    /* =========================================================
+       PUBLISH NEW POST
+    ========================================================= */
+
+    document
+        .getElementById("publishPost")
+        .addEventListener("click", function () {
+
+            const textarea =
+                document.getElementById("postContent");
+
+            const content =
+                textarea.value.trim();
+
+            if (!content) {
+
+                textarea.focus();
+
+                return;
+
+            }
+
+
+            const post =
+                document.createElement("article");
+
+            post.className =
+                "card-social post";
+
+            post.dataset.author =
+                "Christian Calderon";
+
+
+            post.innerHTML = `
+
+                <header class="post-header">
+
+                    <div class="post-user">
+
+                        <img
+                            class="avatar"
+                            src="https://i.pravatar.cc/100?img=12"
+                            alt="Christian"
+                        >
+
+                        <div class="post-user-info">
+
+                            <div class="post-author">
+                                Christian Calderon
+                            </div>
+
+                            <div class="post-meta">
+
+                                <span>Just now</span>
+
+                                <span>·</span>
+
+                                <i class="bi bi-globe-americas"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <button class="post-menu">
+
+                        <i class="bi bi-three-dots"></i>
+
+                    </button>
+
+                </header>
+
+
+                <div class="post-body">
+
+                    <p class="post-text">
+                        ${escapeHtml(content)}
+                    </p>
+
+                </div>
+
+
+                <div class="post-stats">
+
+                    <div class="reaction-count">
+
+                        <span class="reaction-icon">
+
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+
+                        </span>
+
+                        <span class="like-count">
+                            0
+                        </span>
+
+                    </div>
+
+                    <div>
+                        <span>0 comments</span>
+                        &nbsp;
+                        <span>0 shares</span>
+                    </div>
+
+                </div>
+
+
+                <div class="post-actions">
+
+                    <button class="post-action like-button">
+
+                        <i class="bi bi-hand-thumbs-up"></i>
+
+                        <span>Like</span>
+
+                    </button>
+
+                    <button class="post-action comment-button">
+
+                        <i class="bi bi-chat"></i>
+
+                        <span>Comment</span>
+
+                    </button>
+
+                    <button class="post-action share-button">
+
+                        <i class="bi bi-share"></i>
+
+                        <span>Share</span>
+
+                    </button>
+
+                </div>
+
+
+                <div class="comments">
+
+                    <form class="comment-form">
+
+                        <img
+                            class="comment-avatar"
+                            src="https://i.pravatar.cc/100?img=12"
+                            alt="You"
+                        >
+
+                        <input
+                            type="text"
+                            class="comment-input"
+                            placeholder="Write a comment..."
+                        >
+
+                        <button
+                            class="comment-submit"
+                        >
+
+                            <i class="bi bi-send-fill"></i>
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            `;
+
+
+            const feed =
+                document.querySelector(".feed");
+
+
+            const composer =
+                document.querySelector(".composer");
+
+
+            feed.insertBefore(
+                post,
+                composer.nextElementSibling
+            );
+
+
+            textarea.value = "";
+
+
+            const modalElement =
+                document.getElementById(
+                    "createPostModal"
+                );
+
+            const modal =
+                bootstrap.Modal.getInstance(
+                    modalElement
+                );
+
+            modal.hide();
+
+
+            attachPostEvents(post);
+
+        });
+
+
+    /* =========================================================
+       DYNAMIC POST EVENTS
+    ========================================================= */
+
+    function attachPostEvents(post) {
+
+        const likeButton =
+            post.querySelector(".like-button");
+
+        likeButton.addEventListener(
+            "click",
+            function () {
+
+                const countElement =
+                    post.querySelector(".like-count");
+
+                let count =
+                    parseInt(
+                        countElement.textContent
+                    );
+
+                const icon =
+                    this.querySelector("i");
+
+
+                if (
+                    this.classList.contains("liked")
+                ) {
+
+                    this.classList.remove(
+                        "liked"
+                    );
+
+                    icon.classList.remove(
+                        "bi-hand-thumbs-up-fill"
+                    );
+
+                    icon.classList.add(
+                        "bi-hand-thumbs-up"
+                    );
+
+                    count--;
+
+                } else {
+
+                    this.classList.add(
+                        "liked"
+                    );
+
+                    icon.classList.remove(
+                        "bi-hand-thumbs-up"
+                    );
+
+                    icon.classList.add(
+                        "bi-hand-thumbs-up-fill"
+                    );
+
+                    count++;
+
+                }
+
+
+                countElement.textContent =
+                    count;
+
+            }
+        );
+
+
+        const commentButton =
+            post.querySelector(
+                ".comment-button"
+            );
+
+
+        commentButton.addEventListener(
+            "click",
+            function () {
+
+                const comments =
+                    post.querySelector(
+                        ".comments"
+                    );
+
+                comments.classList.toggle(
+                    "show"
+                );
+
+            }
+        );
+
+
+        const commentForm =
+            post.querySelector(
+                ".comment-form"
+            );
+
+
+        commentForm.addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
+
+                const input =
+                    this.querySelector(
+                        ".comment-input"
+                    );
+
+                const text =
+                    input.value.trim();
+
+                if (!text) {
+                    return;
+                }
+
+
+                const comment =
+                    document.createElement(
+                        "div"
+                    );
+
+                comment.className =
+                    "comment";
+
+
+                comment.innerHTML = `
+
+                    <img
+                        class="comment-avatar"
+                        src="https://i.pravatar.cc/100?img=12"
+                        alt="You"
+                    >
+
+                    <div class="comment-content">
+
+                        <div class="comment-author">
+                            Christian Calderon
+                        </div>
+
+                        <p class="comment-text">
+                            ${escapeHtml(text)}
+                        </p>
+
+                    </div>
+
+                `;
+
+
+                const comments =
+                    post.querySelector(
+                        ".comments"
+                    );
+
+
+                comments.insertBefore(
+                    comment,
+                    this
+                );
+
+
+                input.value = "";
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       SEARCH
+    ========================================================= */
+
+    document
+        .getElementById("searchInput")
+        .addEventListener(
+            "input",
+            function () {
+
+                const query =
+                    this.value
+                        .toLowerCase()
+                        .trim();
+
+
+                document
+                    .querySelectorAll(".post")
+                    .forEach(post => {
+
+                        const author =
+                            post
+                                .querySelector(
+                                    ".post-author"
+                                )
+                                .textContent
+                                .toLowerCase();
+
+
+                        const text =
+                            post
+                                .querySelector(
+                                    ".post-text"
+                                )
+                                .textContent
+                                .toLowerCase();
+
+
+                        if (
+                            !query ||
+                            author.includes(query) ||
+                            text.includes(query)
+                        ) {
+
+                            post.style.display =
+                                "";
+
+                        } else {
+
+                            post.style.display =
+                                "none";
+
+                        }
+
+                    });
+
+            }
+        );
+
+
+    /* =========================================================
+       HTML ESCAPE
+    ========================================================= */
+
+    function escapeHtml(value) {
+
+        const div =
+            document.createElement("div");
+
+        div.textContent = value;
+
+        return div.innerHTML;
+
+    }
+
+
+    /* =========================================================
+       PHOTO BUTTON
+    ========================================================= */
+
+    document
+        .getElementById("photoComposerButton")
+        .addEventListener(
+            "click",
+            function () {
+
+                const modalElement =
+                    document.getElementById(
+                        "createPostModal"
+                    );
+
+                const modal =
+                    new bootstrap.Modal(
+                        modalElement
+                    );
+
+                modal.show();
+
+            }
+        );
+
+</script>
+
+</body>
+</html>

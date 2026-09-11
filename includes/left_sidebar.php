@@ -15,8 +15,8 @@ $profileUrl = $profileUrl ?? appUrl('home');
     <nav class="dashboard-nav" aria-label="Dashboard navigation">
         <div class="dashboard-section-title">Overview</div>
         <a href="<?= htmlspecialchars(appUrl('home'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item<?= $dashboardActivePage === 'home' ? ' active' : '' ?>">
-            <span class="material-symbols-rounded" aria-hidden="true">dashboard</span>
-            <span class="dashboard-nav-label">Dashboard</span>
+            <span class="material-symbols-rounded" aria-hidden="true">dynamic_feed</span>
+            <span class="dashboard-nav-label">Your Feed</span>
         </a>
         <a href="<?= htmlspecialchars(appUrl('analytics'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item<?= $dashboardActivePage === 'analytics' ? ' active' : '' ?>">
             <span class="material-symbols-rounded" aria-hidden="true">analytics</span>

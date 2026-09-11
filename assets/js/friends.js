@@ -46,7 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function handleAction(action, userId, button) {
-    if (action === 'message') { showToast('Open the Messages page to start a conversation.'); return; }
+    if (action === 'message') {
+      const messageUrl = new URL(document.querySelector('.friends-main').dataset.messageUrl, window.location.origin);
+      messageUrl.searchParams.set('user_id', userId);
+      window.location.href = messageUrl.toString();
+      return;
+    }
     button.disabled = true;
     try { await request(action, userId); await load(); showToast(action === 'request' ? 'Friend request sent.' : 'Network updated.'); } catch (error) { button.disabled = false; showToast(error.message); }
   }

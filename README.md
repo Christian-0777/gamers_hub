@@ -1,5 +1,17 @@
 # GamersHUB
 
+## Official Update v3.2
+
+### Your Feed Experience
+
+- Renamed the dashboard home navigation item to **Your Feed** with a feed-specific icon
+- Added a database-backed public feed showing posts from friends, followed users, and the wider community
+- Added **Your Feed**, **Following**, and **Friends** feed tabs with relationship-based post filtering
+- Added a CSRF-protected composer for publishing public text posts directly to the feed
+- Added post author details, timestamps, media previews, reaction counts, comment counts, and share counts
+- Added responsive feed styling that uses the full dashboard content width and matches the analytics page spacing
+- Added feed search filtering through the shared dashboard search field
+
 ## Official Update v3.1
 
 ### Community Right Sidebar

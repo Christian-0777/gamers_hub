@@ -44,11 +44,11 @@ if (!$sessionStatement->fetch()) {
 $userId = (int) $_SESSION['user_id'];
 $action = (string) ($_GET['action'] ?? $_POST['action'] ?? 'list');
 
-$profileSelect = 'SELECT u.id, u.username, p.display_name, p.avatar_url, p.online_status,
-						 GROUP_CONCAT(DISTINCT g.name ORDER BY g.name SEPARATOR ", ") AS games
+	$profileSelect = 'SELECT u.id, u.username, p.display_name, p.avatar_url, p.online_status,
+						 GROUP_CONCAT(DISTINCT g.name ORDER BY g.name SEPARATOR \', \') AS games
 				  FROM users u
 				  INNER JOIN user_profiles p ON p.user_id = u.id
-				  LEFT JOIN user_games ug ON ug.user_id = u.id AND ug.status IN ("playing", "favorite")
+				  LEFT JOIN user_games ug ON ug.user_id = u.id AND ug.status IN (\'playing\', \'favorite\')
 				  LEFT JOIN games g ON g.id = ug.game_id';
 
 function profilePayload(array $row, string $relationship = 'none'): array
@@ -70,7 +70,7 @@ function notify(PDO $database, int $recipientId, int $actorId, string $message):
 {
 	$statement = $database->prepare(
 		'INSERT INTO notifications (user_id, actor_id, type, message)
-		 VALUES (:user_id, :actor_id, "follow", :message)'
+		 VALUES (:user_id, :actor_id, \'follow\', :message)'
 	);
 	$statement->execute([
 		'user_id' => $recipientId,
@@ -81,7 +81,7 @@ function notify(PDO $database, int $recipientId, int $actorId, string $message):
 
 if ($action === 'list') {
 	$query = $profileSelect . '
-		WHERE u.id <> :user_id AND u.status = "active"
+		WHERE u.id <> :user_id AND u.status = \'active\'
 		GROUP BY u.id, u.username, p.display_name, p.avatar_url, p.online_status
 		ORDER BY p.display_name ASC';
 	$statement = $database->prepare($query);
@@ -132,7 +132,7 @@ if ($targetId < 1 || $targetId === $userId) {
 	friendsResponse(['error' => 'Choose another gamer.'], 422);
 }
 
-$targetStatement = $database->prepare('SELECT id FROM users WHERE id = :id AND status = "active" LIMIT 1');
+$targetStatement = $database->prepare('SELECT id FROM users WHERE id = :id AND status = \'active\' LIMIT 1');
 $targetStatement->execute(['id' => $targetId]);
 if (!$targetStatement->fetch()) {
 	friendsResponse(['error' => 'Gamer not found.'], 404);

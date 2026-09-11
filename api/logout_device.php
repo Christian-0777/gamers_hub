@@ -33,7 +33,7 @@ $sessionStatement->execute([
 
 $historyStatement = $database->prepare(
     'UPDATE user_login_history
-     SET action = "logout"
+    SET action = \'logout\'
      WHERE user_id = :user_id AND session_id = :session_id'
 );
 $historyStatement->execute([

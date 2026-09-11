@@ -69,14 +69,20 @@ $currentProfile = $currentUserStatement->fetch();
 $avatarUrlValue = $currentProfile['avatar_url'] ?? null;
 $coverUrlValue = $currentProfile['cover_url'] ?? null;
 
-if (($avatarUpload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-    $avatarResult = compressUploadedImage($avatarUpload, 'uploads/profile', 'profile_' . $userId);
-    $avatarUrlValue = $avatarResult['url'];
-}
+try {
+    if (($avatarUpload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+        $avatarResult = compressUploadedImage($avatarUpload, 'profile', 'profile_' . $userId);
+        $avatarUrlValue = $avatarResult['url'];
+    }
 
-if (($coverUpload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-    $coverResult = compressUploadedImage($coverUpload, 'uploads/cover', 'cover_' . $userId);
-    $coverUrlValue = $coverResult['url'];
+    if (($coverUpload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+        $coverResult = compressUploadedImage($coverUpload, 'cover', 'cover_' . $userId);
+        $coverUrlValue = $coverResult['url'];
+    }
+} catch (Throwable $exception) {
+    error_log($exception->getMessage());
+    header('Location: ' . appUrl('settings') . '?tab=' . urlencode($tab) . '&error=1');
+    exit;
 }
 
 $fields = [
@@ -197,6 +203,18 @@ try {
     ]);
 
     $database->commit();
+
+    try {
+        if ($avatarUrlValue !== ($currentProfile['avatar_url'] ?? null)) {
+            deleteFromLocalStorageUrl($currentProfile['avatar_url'] ?? null);
+        }
+        if ($coverUrlValue !== ($currentProfile['cover_url'] ?? null)) {
+            deleteFromLocalStorageUrl($currentProfile['cover_url'] ?? null);
+        }
+    } catch (Throwable $exception) {
+        error_log($exception->getMessage());
+    }
+
     header('Location: ' . appUrl('settings') . '?tab=' . urlencode($tab) . '&saved=1');
     exit;
 } catch (Throwable $exception) {

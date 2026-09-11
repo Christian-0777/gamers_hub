@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const apiUrl = messenger.dataset.apiUrl;
   const currentUser = Number(messenger.dataset.currentUser);
+  const defaultAvatar = messenger.dataset.defaultAvatar;
   const list = document.querySelector('#conversationList');
   const search = document.querySelector('#conversationSearch');
   const chatArea = document.querySelector('#chatArea');
@@ -21,9 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const formatDate = (date) => new Date(`${date.replace(' ', 'T')}Z`).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
 
   function avatarMarkup(conversation, className = 'conversation-avatar') {
-    return conversation.avatar
-      ? `<img class="${className}" src="${escapeText(conversation.avatar)}" alt="">`
-      : `<div class="${className} conversation-avatar-fallback">${initials(conversation.name)}</div>`;
+    return `<img class="${className}" src="${escapeText(conversation.avatar || defaultAvatar)}" alt="">`;
   }
 
   function renderConversations() {
@@ -94,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#chatUserStatus').textContent = conversation.status;
     document.querySelector('#chatOnlineDot').classList.toggle('online', conversation.online);
     const avatar = document.querySelector('#chatAvatar');
-    avatar.src = conversation.avatar || `${window.location.origin}/assets/icons/profile.png`;
+    avatar.src = conversation.avatar || defaultAvatar;
     avatar.alt = conversation.name;
     chatEmpty.hidden = true;
     chatContent.hidden = false;
@@ -107,6 +106,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const data = await request({ action: 'conversations' });
     state.conversations = data.conversations || [];
     renderConversations();
+    const requestedUserId = Number(new URLSearchParams(window.location.search).get('user_id'));
+    if (requestedUserId && !state.activeId) {
+      const opened = await request({ action: 'open', target_user_id: requestedUserId });
+      history.replaceState({}, document.title, window.location.pathname);
+      const refreshed = await request({ action: 'conversations' });
+      state.conversations = refreshed.conversations || [];
+      if (!state.conversations.some((conversation) => conversation.id === opened.conversation_id)) {
+        state.conversations.unshift(opened.conversation);
+      }
+      renderConversations();
+      await selectConversation(opened.conversation_id);
+      return;
+    }
     if (state.conversations.length && !state.activeId) await selectConversation(state.conversations[0].id);
   }
 

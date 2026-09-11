@@ -12,28 +12,28 @@ $currentUserId = (int) ($_SESSION['user_id'] ?? 0);
 if ($currentUserId > 0) {
     $friendStatement = db()->prepare(
         'SELECT u.id, u.username, p.display_name, p.online_status,
-                GROUP_CONCAT(DISTINCT g.name ORDER BY ug.updated_at DESC SEPARATOR ", ") AS games,
+                GROUP_CONCAT(DISTINCT g.name ORDER BY g.name SEPARATOR \', \') AS games,
                 COALESCE(a.weekly_activity, 0) AS weekly_activity
          FROM followers outgoing
          INNER JOIN followers incoming
              ON incoming.follower_id = outgoing.following_id
             AND incoming.following_id = outgoing.follower_id
-         INNER JOIN users u ON u.id = outgoing.following_id AND u.status = "active"
+            INNER JOIN users u ON u.id = outgoing.following_id AND u.status = \'active\'
          INNER JOIN user_profiles p ON p.user_id = u.id
          LEFT JOIN user_games ug
              ON ug.user_id = u.id
-            AND ug.status IN ("playing", "favorite")
+            AND ug.status IN (\'playing\', \'favorite\')
          LEFT JOIN games g ON g.id = ug.game_id
          LEFT JOIN (
              SELECT user_id, COUNT(*) AS weekly_activity
              FROM posts
-             WHERE status = "published"
-               AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+             WHERE status = \'published\'
+               AND created_at >= NOW() - INTERVAL 7 DAY
              GROUP BY user_id
          ) a ON a.user_id = u.id
          WHERE outgoing.follower_id = :user_id
          GROUP BY u.id, u.username, p.display_name, p.online_status, a.weekly_activity
-         ORDER BY p.online_status = "online" DESC, p.display_name ASC'
+        ORDER BY (p.online_status = \'online\') DESC, p.display_name ASC'
     );
     $friendStatement->execute(['user_id' => $currentUserId]);
 

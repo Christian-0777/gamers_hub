@@ -34,7 +34,7 @@ function getUserByUsername($pdo, $username) {
             up.online_status
         FROM users u
         JOIN user_profiles up ON u.id = up.user_id
-        WHERE u.username = ? AND u.status = "active"
+        WHERE u.username = ? AND u.status = \'active\'
         LIMIT 1
     ');
     $stmt->execute([$username]);
@@ -82,7 +82,7 @@ function getUserGames($pdo, $user_id, $limit = 3) {
             ug.status
         FROM user_games ug
         JOIN games g ON ug.game_id = g.id
-        WHERE ug.user_id = ? AND ug.status IN ("playing", "favorite")
+        WHERE ug.user_id = ? AND ug.status IN (\'playing\', \'favorite\')
         ORDER BY ug.updated_at DESC
         LIMIT ?
     ');
@@ -117,11 +117,11 @@ if (!function_exists('getUserPosts')) {
                 p.id,
                 p.content,
                 p.created_at,
-                (SELECT COUNT(*) FROM post_reactions WHERE post_id = p.id AND reaction_type = "like") as like_count,
+                (SELECT COUNT(*) FROM post_reactions WHERE post_id = p.id AND reaction_type = \'like\') as like_count,
                 (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comment_count,
                 (SELECT COUNT(*) FROM post_shares WHERE post_id = p.id) as share_count
             FROM posts p
-            WHERE p.user_id = ? AND p.visibility = "public" AND p.status = "published"
+            WHERE p.user_id = ? AND p.visibility = \'public\' AND p.status = \'published\'
             ORDER BY p.created_at DESC
             LIMIT ?
         ');
@@ -131,7 +131,7 @@ if (!function_exists('getUserPosts')) {
         $mediaStatement = $pdo->prepare(
             'SELECT media_url
              FROM post_media
-             WHERE post_id = :post_id AND media_type = "image"
+             WHERE post_id = :post_id AND media_type = \'image\'
              ORDER BY sort_order ASC, id ASC
              LIMIT 4'
         );
@@ -145,7 +145,7 @@ if (!function_exists('getUserPosts')) {
              FROM comments c
              INNER JOIN users u ON u.id = c.user_id
              INNER JOIN user_profiles up ON up.user_id = u.id
-             WHERE c.post_id = :post_id AND c.status = "published"
+             WHERE c.post_id = :post_id AND c.status = \'published\'
              ORDER BY c.created_at ASC
              LIMIT 2'
         );

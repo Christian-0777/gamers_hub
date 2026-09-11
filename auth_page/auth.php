@@ -172,7 +172,8 @@ function handleAuthRequest(string $mode): array
 
                 $database->beginTransaction();
                 $userStatement = $database->prepare(
-                    'INSERT INTO users (username, email, password_hash) VALUES (:username, :email, :password_hash)'
+                    'INSERT INTO users (username, email, password_hash)
+                     VALUES (:username, :email, :password_hash)'
                 );
                 $userStatement->execute([
                     'username' => $username,
