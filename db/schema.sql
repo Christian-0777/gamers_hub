@@ -526,6 +526,7 @@ CREATE TABLE posts (
 
     visibility ENUM(
         'public',
+        'friends',
         'followers',
         'private'
     ) NOT NULL DEFAULT 'public',

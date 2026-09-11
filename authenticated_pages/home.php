@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/urls.php';
+require_once __DIR__ . '/../config/storage.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
@@ -67,6 +68,20 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 $postError = null;
+$postTypes = [
+    'text' => 'General update',
+    'discussion' => 'Discussion',
+    'question' => 'Question',
+    'looking_for_players' => 'Looking for players',
+    'achievement' => 'Achievement',
+    'review' => 'Review',
+];
+$visibilityOptions = [
+    'public' => 'Public',
+    'friends' => 'Friends',
+    'followers' => 'Followers',
+    'private' => 'Only me',
+];
 $activeFeed = (string) ($_GET['feed'] ?? 'your');
 $validFeedTabs = ['your', 'following', 'friends'];
 
@@ -77,6 +92,24 @@ if (!in_array($activeFeed, $validFeedTabs, true)) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create_post') {
     $csrfToken = (string) ($_POST['csrf_token'] ?? '');
     $content = trim((string) ($_POST['content'] ?? ''));
+    $visibility = (string) ($_POST['visibility'] ?? 'public');
+    $postType = (string) ($_POST['post_type'] ?? 'text');
+    $gameId = (int) ($_POST['game_id'] ?? 0);
+    $uploadedFiles = (array) ($_FILES['media'] ?? []);
+    $mediaFiles = [];
+
+    foreach (($uploadedFiles['error'] ?? []) as $index => $uploadError) {
+        if ($uploadError === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+
+        $mediaFiles[] = [
+            'name' => (string) ($uploadedFiles['name'][$index] ?? ''),
+            'tmp_name' => (string) ($uploadedFiles['tmp_name'][$index] ?? ''),
+            'error' => (int) $uploadError,
+            'size' => (int) ($uploadedFiles['size'][$index] ?? 0),
+        ];
+    }
 
     if (empty($_SESSION['csrf_token']) || $csrfToken === '' || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
         $postError = 'Your session expired. Please try again.';
@@ -84,18 +117,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
         $postError = 'Write something before publishing your post.';
     } elseif (mb_strlen($content) > 5000) {
         $postError = 'Posts must be 5,000 characters or fewer.';
+    } elseif (!isset($visibilityOptions[$visibility])) {
+        $postError = 'Choose a valid audience for your post.';
+    } elseif (!isset($postTypes[$postType])) {
+        $postError = 'Choose a valid post type.';
+    } elseif (count($mediaFiles) > 10) {
+        $postError = 'You can attach up to 10 files to one post.';
     } else {
-        $postStatement = db()->prepare(
-            'INSERT INTO posts (user_id, post_type, content, visibility, status)
-             VALUES (:user_id, \'text\', :content, \'public\', \'published\')'
-        );
-        $postStatement->execute([
-            'user_id' => $userId,
-            'content' => $content,
-        ]);
+        $pdo = db();
+        $pdo->beginTransaction();
 
-        header('Location: ' . appUrl('home') . '?posted=1');
-        exit;
+        try {
+            if ($gameId > 0) {
+                $gameStatement = $pdo->prepare("SELECT id FROM games WHERE id = :id AND status = 'active' LIMIT 1");
+                $gameStatement->execute(['id' => $gameId]);
+                if (!$gameStatement->fetch()) {
+                    $gameId = 0;
+                }
+            }
+
+            $postStatement = $pdo->prepare(
+                'INSERT INTO posts (user_id, game_id, post_type, content, visibility, status)
+                 VALUES (:user_id, :game_id, :post_type, :content, :visibility, \'published\')'
+            );
+            $postStatement->execute([
+                'user_id' => $userId,
+                'game_id' => $gameId > 0 ? $gameId : null,
+                'post_type' => $postType,
+                'content' => $content,
+                'visibility' => $visibility,
+            ]);
+            $postId = (int) $pdo->lastInsertId();
+
+            if ($mediaFiles !== []) {
+                $usernameSlug = preg_replace('/[^a-zA-Z0-9_-]+/', '_', (string) $user['username']) ?: 'user';
+                $relativeFolder = count($mediaFiles) >= 2 ? 'post/' . $usernameSlug . '_' . $postId : 'post';
+                $uploadRoot = dirname(__DIR__) . '/uploads/' . $relativeFolder;
+                if (!is_dir($uploadRoot) && !mkdir($uploadRoot, 0775, true) && !is_dir($uploadRoot)) {
+                    throw new RuntimeException('Unable to create the post upload folder.');
+                }
+
+                $mediaStatement = $pdo->prepare(
+                    'INSERT INTO post_media (post_id, media_type, media_url, file_size, width, height, duration_seconds, sort_order)
+                     VALUES (:post_id, :media_type, :media_url, :file_size, :width, :height, :duration_seconds, :sort_order)'
+                );
+
+                foreach ($mediaFiles as $sortOrder => $file) {
+                    if ($file['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) {
+                        throw new RuntimeException('One of the selected files could not be uploaded.');
+                    }
+
+                    $mimeType = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+                    $mediaType = str_starts_with((string) $mimeType, 'image/') ? 'image' : (str_starts_with((string) $mimeType, 'video/') ? 'video' : null);
+                    if ($mediaType === null || $file['size'] > 100 * 1024 * 1024) {
+                        throw new RuntimeException('Only images and videos up to 100 MB are allowed.');
+                    }
+
+                    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                    $safeExtension = preg_replace('/[^a-z0-9]/', '', $extension) ?: ($mediaType === 'image' ? 'jpg' : 'mp4');
+                    $filename = ($sortOrder + 1) . '_' . bin2hex(random_bytes(8)) . '.' . $safeExtension;
+                    $targetPath = $uploadRoot . DIRECTORY_SEPARATOR . $filename;
+                    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+                        throw new RuntimeException('Unable to save one of the selected files.');
+                    }
+
+                    $width = null;
+                    $height = null;
+                    if ($mediaType === 'image') {
+                        $dimensions = @getimagesize($targetPath);
+                        $width = $dimensions[0] ?? null;
+                        $height = $dimensions[1] ?? null;
+                    }
+
+                    $mediaUrl = rtrim(appUrl('uploads'), '/') . '/' . implode('/', array_map('rawurlencode', explode('/', $relativeFolder))) . '/' . rawurlencode($filename);
+                    $mediaStatement->execute([
+                        'post_id' => $postId,
+                        'media_type' => $mediaType,
+                        'media_url' => $mediaUrl,
+                        'file_size' => $file['size'],
+                        'width' => $width,
+                        'height' => $height,
+                        'duration_seconds' => null,
+                        'sort_order' => $sortOrder,
+                    ]);
+                }
+            }
+
+            $pdo->commit();
+            header('Location: ' . appUrl('home') . '?posted=1');
+            exit;
+        } catch (Throwable $exception) {
+            $pdo->rollBack();
+            $postError = $exception->getMessage();
+        }
     }
 }
 
@@ -157,13 +271,39 @@ $feedStatement = db()->prepare(
      FROM posts p
      INNER JOIN users u ON u.id = p.user_id AND u.status = \'active\'
      LEFT JOIN user_profiles up ON up.user_id = u.id
-     WHERE p.visibility = \'public\' AND p.status = \'published\'
+         WHERE p.status = \'published\'
+             AND (
+                     p.user_id = :feed_owner_id
+                     OR p.visibility = \'public\'
+                     OR (p.visibility = \'followers\' AND EXISTS (SELECT 1 FROM followers f WHERE f.follower_id = :feed_follower_id AND f.following_id = p.user_id))
+                     OR (p.visibility = \'friends\' AND EXISTS (SELECT 1 FROM followers fo INNER JOIN followers fi ON fi.follower_id = fo.following_id AND fi.following_id = fo.follower_id WHERE fo.follower_id = :feed_friend_id AND fo.following_id = p.user_id))
+             )
     ' . $feedFilter . '
      ORDER BY p.created_at DESC, p.id DESC
      LIMIT 30'
 );
+$feedParameters = array_merge([
+    'feed_owner_id' => $userId,
+    'feed_follower_id' => $userId,
+    'feed_friend_id' => $userId,
+], $feedParameters);
 $feedStatement->execute($feedParameters);
 $feedPosts = $feedStatement->fetchAll();
+
+$gameStatement = db()->query("SELECT id, name FROM games WHERE status = 'active' ORDER BY name ASC");
+$games = $gameStatement->fetchAll();
+
+$mediaStatement = db()->prepare(
+    'SELECT media_type, media_url, thumbnail_url
+     FROM post_media
+     WHERE post_id = :post_id
+     ORDER BY sort_order ASC, id ASC'
+);
+
+foreach ($feedPosts as $index => $feedPost) {
+    $mediaStatement->execute(['post_id' => $feedPost['id']]);
+    $feedPosts[$index]['media'] = $mediaStatement->fetchAll();
+}
 
 $timeAgo = static function (string $dateString): string {
     $seconds = max(0, time() - strtotime($dateString));
@@ -289,18 +429,45 @@ $dashboardActivePage = 'home';
 
             <div class="feed-layout">
                 <section class="feed-stream" aria-label="Your feed">
-                    <form class="feed-composer dashboard-card" method="post">
-                        <input type="hidden" name="action" value="create_post">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-                        <div class="feed-composer-top">
+                    <button class="feed-composer dashboard-card" type="button" data-post-modal-open>
+                        <span class="feed-composer-top">
                             <img class="feed-avatar" src="<?= htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') ?>" alt="">
-                            <textarea name="content" rows="2" maxlength="5000" placeholder="What's happening in your gaming world, <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>?" aria-label="Post content"></textarea>
-                        </div>
-                        <div class="feed-composer-footer">
-                            <span class="feed-composer-hint"><span class="material-symbols-rounded" aria-hidden="true">public</span> Public post</span>
-                            <button class="feed-publish-button" type="submit"><span class="material-symbols-rounded" aria-hidden="true">send</span> Publish</button>
-                        </div>
-                    </form>
+                            <span class="feed-composer-placeholder">What's happening in your gaming world, <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>?</span>
+                        </span>
+                        <span class="feed-composer-footer">
+                            <span class="feed-composer-hint"><span class="material-symbols-rounded" aria-hidden="true">add_photo_alternate</span> Create a post</span>
+                            <span class="feed-publish-button"><span class="material-symbols-rounded" aria-hidden="true">edit</span> Compose</span>
+                        </span>
+                    </button>
+
+                    <div class="post-modal" data-post-modal hidden>
+                        <div class="post-modal-backdrop" data-post-modal-close></div>
+                        <section class="post-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="postModalTitle">
+                            <form class="post-form" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="action" value="create_post">
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                <header class="post-modal-header">
+                                    <h2 id="postModalTitle">Create a post</h2>
+                                    <button class="post-modal-close" type="button" data-post-modal-close aria-label="Close post composer"><span class="material-symbols-rounded" aria-hidden="true">close</span></button>
+                                </header>
+                                <div class="post-author-row">
+                                    <img class="feed-avatar" src="<?= htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') ?>" alt="">
+                                    <div><strong><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?></strong><span>@<?= htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8') ?></span></div>
+                                </div>
+                                <div class="post-form-options">
+                                    <label>Audience<select name="visibility">
+                                        <?php foreach ($visibilityOptions as $value => $label): ?><option value="<?= htmlspecialchars($value, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?>
+                                    </select></label>
+                                    <label>Game<select name="game_id"><option value="0">No game</option><?php foreach ($games as $game): ?><option value="<?= (int) $game['id'] ?>"><?= htmlspecialchars($game['name'], ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></label>
+                                    <label>Post type<select name="post_type"><?php foreach ($postTypes as $value => $label): ?><option value="<?= htmlspecialchars($value, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></label>
+                                </div>
+                                <textarea name="content" rows="6" maxlength="5000" placeholder="Share something with the community..." required></textarea>
+                                <label class="post-upload-control"><span class="material-symbols-rounded" aria-hidden="true">perm_media</span><span>Add photos or video clips</span><small>Up to 10 files. Videos must be 5 minutes or shorter.</small><input type="file" name="media[]" accept="image/*,video/*" multiple data-post-media></label>
+                                <div class="post-media-preview" data-post-media-preview></div>
+                                <footer class="post-modal-footer"><span>Images and videos are checked before publishing.</span><button class="feed-publish-button" type="submit"><span class="material-symbols-rounded" aria-hidden="true">send</span> Publish</button></footer>
+                            </form>
+                        </section>
+                    </div>
 
                     <?php if (empty($feedPosts)): ?>
                         <div class="dashboard-card feed-empty-state">
@@ -325,8 +492,12 @@ $dashboardActivePage = 'home';
                                 </header>
                                 <div class="feed-post-body">
                                     <p><?= nl2br(htmlspecialchars($post['content'], ENT_QUOTES, 'UTF-8')) ?></p>
-                                    <?php if (!empty($post['media_url'])): ?>
-                                        <img class="feed-post-media" src="<?= htmlspecialchars($post['media_url'], ENT_QUOTES, 'UTF-8') ?>" alt="Post attachment">
+                                    <?php if (!empty($post['media'])): ?>
+                                        <div class="feed-post-gallery feed-post-gallery-count-<?= min(4, count($post['media'])) ?>">
+                                            <?php foreach ($post['media'] as $media): ?>
+                                                <?php if ($media['media_type'] === 'video'): ?><video class="feed-post-media" controls preload="metadata" src="<?= htmlspecialchars($media['media_url'], ENT_QUOTES, 'UTF-8') ?>"></video><?php else: ?><img class="feed-post-media" src="<?= htmlspecialchars($media['media_url'], ENT_QUOTES, 'UTF-8') ?>" alt="Post attachment"><?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                                 <div class="feed-post-metrics">

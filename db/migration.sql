@@ -6,6 +6,14 @@
 
 USE gamers_hub;
 
+ALTER TABLE posts
+    MODIFY COLUMN visibility ENUM(
+        'public',
+        'friends',
+        'followers',
+        'private'
+    ) NOT NULL DEFAULT 'public';
+
 CREATE TABLE IF NOT EXISTS conversations (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     is_group BOOLEAN NOT NULL DEFAULT FALSE,

@@ -1,6 +1,27 @@
 # GamersHUB
 
-## Official Update v3.2
+### Versioning Convention
+
+- **Official Update:** `major.0`
+- **Minor Update:** `major.minor`, where `minor` is `1` or greater
+- **Patch Update:** `major.minor.patch`, where `patch` is `1` or greater
+
+## Patch Update v3.2.1
+
+### Post Composer & Media Feed
+
+- Added a click-to-open post creation modal with the current user's avatar and name
+- Added audience controls for Public, Friends, Followers, and Only me posts
+- Added game selection and post type controls for discussions, questions, looking-for-player posts, achievements, reviews, and general updates
+- Added multipart image and video uploads with support for up to 10 attachments per post
+- Added client-side video duration validation for clips up to 5 minutes and server-side media type and file size validation
+- Added post media storage under `uploads/post/`, with multi-attachment posts grouped in `uploads/post/<username>_<post_id>/`
+- Added ordered media records with dimensions and file metadata in `post_media`
+- Added responsive feed galleries and collages for posts containing multiple images or videos
+- Added visibility-aware feed filtering for the post author, public posts, followers, and mutual friends
+- Added the `friends` post visibility option to the MySQL schema and migration
+
+## Minor Update v3.2
 
 ### Your Feed Experience
 
@@ -12,7 +33,7 @@
 - Added responsive feed styling that uses the full dashboard content width and matches the analytics page spacing
 - Added feed search filtering through the shared dashboard search field
 
-## Official Update v3.1
+## Minor Update v3.1
 
 ### Community Right Sidebar
 
@@ -150,7 +171,7 @@ GamersHUB now includes a complete authentication foundation for account access a
 - PHPMailer SMTP integration through environment-based configuration
 - Database and mail credentials loaded from `.env`
 
-## Official Update v0.1
+## Minor Update v0.1
 
 GamersHUB is a professional interactive gaming space built for modern gamers. It brings gamers together through a social feed where they can share gaming thoughts, achievements, questions, and looking-for-group posts.
 

@@ -16,8 +16,34 @@
 		<p class="document-lede">A running record of the features, fixes, and improvements that shape GamersHUB.</p>
 	</header>
 
+	<section class="release latest-release" aria-labelledby="release-321">
+		<div class="release-meta"><span>Patch update</span><time datetime="2026-09-11">v3.2.1</time></div>
+		<h2 id="release-321">Post composer and media feed</h2>
+		<ul>
+			<li>Added a click-to-open post creation modal with the current user's avatar and name.</li>
+			<li>Added audience controls for Public, Friends, Followers, and Only me posts.</li>
+			<li>Added game selection and post types for discussions, questions, looking-for-player posts, achievements, reviews, and general updates.</li>
+			<li>Added image and video uploads with up to 10 attachments per post, five-minute video validation, and server-side media checks.</li>
+			<li>Grouped multi-attachment posts under <code>uploads/post/&lt;username&gt;_&lt;post_id&gt;/</code> and stored ordered media metadata in <code>post_media</code>.</li>
+			<li>Added responsive feed galleries and collages for posts containing multiple images or videos.</li>
+			<li>Added visibility-aware feed filtering and the Friends visibility option to the MySQL schema and migration.</li>
+		</ul>
+	</section>
+
+	<section class="release latest-release" aria-labelledby="release-32">
+		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-10">v3.2</time></div>
+		<h2 id="release-32">Your feed experience</h2>
+		<ul>
+			<li>Renamed the dashboard home navigation item to Your Feed and added feed-specific navigation.</li>
+			<li>Added a database-backed public feed with Your Feed, Following, and Friends views.</li>
+			<li>Added a CSRF-protected composer for publishing text posts directly to the feed.</li>
+			<li>Added post author details, timestamps, media previews, reaction counts, comment counts, and share counts.</li>
+			<li>Added responsive feed styling and feed search filtering through the shared dashboard search field.</li>
+		</ul>
+	</section>
+
 	<section class="release latest-release" aria-labelledby="release-31">
-		<div class="release-meta"><span>Official update</span><time datetime="2026-09-10">v3.1</time></div>
+		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-10">v3.1</time></div>
 		<h2 id="release-31">Community right sidebar</h2>
 		<ul>
 			<li>Added a shared right sidebar below the dashboard header with responsive desktop and mobile behavior.</li>
