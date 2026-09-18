@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Update Logs | GamersHUB</title>
+	<link rel="icon" type="image/png" href="../assets/icons/logo.png">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="document-shell">
+	<header class="document-header">
+		<a class="document-brand" href="../index.php"><img src="../assets/icons/logo.png" alt=""> Gamers<span>HUB</span></a>
+		<p class="document-kicker">Product history</p>
+		<h1>Update logs</h1>
+		<p class="document-lede">A running record of the features, fixes, and improvements that shape GamersHUB.</p>
+	</header>
+
+	<section class="release latest-release" aria-labelledby="release-41">
+		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-19">v4.1</time></div>
+		<h2 id="release-41">My Games and update feeds</h2>
+		<ul>
+			<li>Added a dedicated My Games dashboard page for selected games and collected updates.</li>
+			<li>Added SCS Software RSS fetching for Euro Truck Simulator 2 and American Truck Simulator.</li>
+			<li>Added Valorant update fetching from the public Valorant game-updates page.</li>
+			<li>Added source hashing and duplicate detection for fetched articles.</li>
+			<li>Added RSS and HTML source handling with a one-minute fetch interval.</li>
+			<li>Added game update tables backed by <code>game_catalog</code>.</li>
+			<li>Fixed My Games dashboard fonts and spacing to match the Analytics page.</li>
+		</ul>
+	</section>
+
+	<section class="release latest-release" aria-labelledby="release-40">
+		<div class="release-meta"><span>Official update</span><time datetime="2026-09-19">v4.0</time></div>
+		<h2 id="release-40">Gamer's Preference management</h2>
+		<ul>
+			<li>Added a dedicated Gamer's Preference tab to account settings.</li>
+			<li>Moved gaming style, voice chat availability, game platforms, and content preferences out of the Account tab.</li>
+			<li>Added live game search by game name or developer with catalog API results.</li>
+			<li>Added Add/Remove controls for selected games and preferred developers.</li>
+			<li>Added database-backed persistence and catalog validation for game and developer preferences.</li>
+			<li>Added migration support for the <code>user_developers</code> preference relation.</li>
+		</ul>
+	</section>
+
+	<section class="release latest-release" aria-labelledby="release-323">
+		<div class="release-meta"><span>Patch update</span><time datetime="2026-09-18">v3.2.3</time></div>
+		<h2 id="release-323">Profile and dashboard interaction fixes</h2>
+		<ul>
+			<li>Fixed profile warnings caused by the shared right sidebar overwriting authenticated user data.</li>
+			<li>Restored profile display names, usernames, avatars, and post author data on authenticated profile pages.</li>
+			<li>Fixed broken profile post image URLs caused by overwritten user data.</li>
+			<li>Made right-sidebar icon updates null-safe so optional controls cannot interrupt shared dashboard interactions.</li>
+			<li>Verified the affected PHP pages and shared JavaScript files with syntax checks.</li>
+		</ul>
+	</section>
+
+	<section class="release latest-release" aria-labelledby="release-322">
+		<div class="release-meta"><span>Patch update</span><time datetime="2026-09-18">v3.2.2</time></div>
+		<h2 id="release-322">Notification dropdown fixes</h2>
+		<ul>
+			<li>Restored the Facebook-inspired notification dropdown layout across authenticated dashboard pages.</li>
+			<li>Moved shared notification dropdown styles into the global dashboard layout stylesheet.</li>
+			<li>Fixed dropdown positioning so it anchors below the notification button.</li>
+			<li>Added shared stylesheet cache versioning so styling updates apply without a manual hard refresh.</li>
+		</ul>
+	</section>
+
+	<section class="release latest-release" aria-labelledby="release-321">
+		<div class="release-meta"><span>Patch update</span><time datetime="2026-09-11">v3.2.1</time></div>
+		<h2 id="release-321">Post composer and media feed</h2>
+		<ul>
+			<li>Added a click-to-open post creation modal with the current user's avatar and name.</li>
+			<li>Added audience controls for Public, Friends, Followers, and Only me posts.</li>
+			<li>Added game selection and post types for discussions, questions, looking-for-player posts, achievements, reviews, and general updates.</li>
+			<li>Added image and video uploads with up to 10 attachments per post, five-minute video validation, and server-side media checks.</li>
+			<li>Grouped multi-attachment posts under <code>uploads/post/&lt;username&gt;_&lt;post_id&gt;/</code> and stored ordered media metadata in <code>post_media</code>.</li>
+			<li>Added responsive feed galleries and collages for posts containing multiple images or videos.</li>
+			<li>Added visibility-aware feed filtering and the Friends visibility option to the MySQL schema and migration.</li>
+		</ul>
+	</section>
+
+	<section class="release latest-release" aria-labelledby="release-32">
+		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-10">v3.2</time></div>
+		<h2 id="release-32">Your feed experience</h2>
+		<ul>
+			<li>Renamed the dashboard home navigation item to Your Feed and added feed-specific navigation.</li>
+			<li>Added a database-backed public feed with Your Feed, Following, and Friends views.</li>
+			<li>Added a CSRF-protected composer for publishing text posts directly to the feed.</li>
+			<li>Added post author details, timestamps, media previews, reaction counts, comment counts, and share counts.</li>
+			<li>Added responsive feed styling and feed search filtering through the shared dashboard search field.</li>
+		</ul>
+	</section>
+
+	<section class="release latest-release" aria-labelledby="release-31">
+		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-10">v3.1</time></div>
+		<h2 id="release-31">Community right sidebar</h2>
+		<ul>
+			<li>Added a shared right sidebar below the dashboard header with responsive desktop and mobile behavior.</li>
+			<li>Added a collapsed-by-default community rail with an in-sidebar toggle.</li>
+			<li>Connected friend activity to the database for mutual friends, online status, selected games, and weekly post activity.</li>
+			<li>Added online friends versus total friends counts.</li>
+			<li>Added a GClan members online placeholder marked as coming soon.</li>
+		</ul>
+	</section>
+
+	<section class="release latest-release" aria-labelledby="release-301">
+		<div class="release-meta"><span>Patch update</span><time datetime="2026-09-10">v3.0.1</time></div>
+		<h2 id="release-301">Shared layout and branding fixes</h2>
+		<ul>
+			<li>Fixed messaging page sizing and header layout to match the analytics dashboard.</li>
+			<li>Restored shared Bootstrap layout dependencies, coming-soon modal styles, and messaging actions.</li>
+			<li>Updated the shared dashboard latency label to display <strong>Ping: &lt;value&gt;ms</strong>.</li>
+			<li>Replaced text-based brand marks with the supplied GamersHUB logo across the application.</li>
+			<li>Added the GamersHUB logo as the favicon across page templates.</li>
+		</ul>
+	</section>
+
+	<section class="release" aria-labelledby="release-30">
+		<div class="release-meta"><span>Official update</span><time datetime="2026">v3.0</time></div>
+		<h2 id="release-30">Messaging experience</h2>
+		<ul>
+			<li>Added a database-backed Messenger-style messaging page with conversation switching, search, online status, and unread counts.</li>
+			<li>Added message sending, emoji insertion, responsive mobile chat, and realtime polling.</li>
+			<li>Added conversation, participant, and message tables with readable JSON API error responses.</li>
+			<li>Added connection latency measurement and clean internal URL redirects.</li>
+		</ul>
+	</section>
+
+	<footer class="document-footer"><a href="../index.php">Return to GamersHUB</a><span>More updates are documented in the project README.</span></footer>
+</main>
+</body>
+</html>

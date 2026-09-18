@@ -1,0 +1,45 @@
+Options -MultiViews
+DirectoryIndex index.php
+
+RewriteEngine On
+
+# Keep implementation paths out of the browser URL.
+RewriteCond %{THE_REQUEST} \s/+[^?\ ]*/index\.php(?:[?\s]) [NC]
+RewriteCond %{REQUEST_URI} ^(.*/)?index\.php$ [NC]
+RewriteRule ^index\.php$ %1 [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/(?:auth_page/)?login\.php(?:[?\s]) [NC]
+RewriteRule ^(?:auth_page/)?login\.php$ %1/login [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/(?:auth_page/)?signup\.php(?:[?\s]) [NC]
+RewriteRule ^(?:auth_page/)?signup\.php$ %1/signup [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/(?:auth_page/)?verify\.php(?:[?\s]) [NC]
+RewriteRule ^(?:auth_page/)?verify\.php$ %1/verify [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/authenticated_pages/home\.php(?:[?\s]) [NC]
+RewriteRule ^authenticated_pages/home\.php$ %1/home [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/authenticated_pages/account\.php(?:[?\s]) [NC]
+RewriteRule ^authenticated_pages/account\.php$ %1/settings [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/authenticated_pages/analytics\.php(?:[?\s]) [NC]
+RewriteRule ^authenticated_pages/analytics\.php$ %1/analytics [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/authenticated_pages/message\.php(?:[?\s]) [NC]
+RewriteRule ^authenticated_pages/message\.php$ %1/message [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/(?:auth_page/)?preferences\.php(?:[?\s]) [NC]
+RewriteRule ^(?:auth_page/)?preferences\.php$ %1/preferences [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/(?:auth_page/)?logout\.php(?:[?\s]) [NC]
+RewriteRule ^(?:auth_page/)?logout\.php$ %1/logout [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+[^?\ ]*/authenticated_pages/profile\.php(?:[?\s]) [NC]
+RewriteCond %{QUERY_STRING} (^|&)username=([^&]+)(&|$) [NC]
+RewriteRule ^authenticated_pages/profile\.php$ @%2 [R=301,L,NE]
+
+# Send clean application URLs to the PHP front controller while preserving assets.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L,QSA]

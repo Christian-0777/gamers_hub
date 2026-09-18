@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse | Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<div class="sidebar-backdrop" id="rightSidebarBackdrop"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">P</div>
+    <span class="brand-name">Pulse</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Overview</div>
+    <a href="#" class="nav-item-custom active">
+      <i class="bi bi-grid-1x2-fill"></i><span class="nav-label">Dashboard</span>
+    </a>
+    <a href="#" class="nav-item-custom">
+      <i class="bi bi-bar-chart-line-fill"></i><span class="nav-label">Analytics</span>
+    </a>
+    <a href="#" class="nav-item-custom">
+      <i class="bi bi-cart-fill"></i><span class="nav-label">Orders</span><span class="badge-mini">12</span>
+    </a>
+    <a href="#" class="nav-item-custom">
+      <i class="bi bi-people-fill"></i><span class="nav-label">Customers</span>
+    </a>
+
+    <div class="nav-section-title">Manage</div>
+    <a href="#" class="nav-item-custom">
+      <i class="bi bi-box-seam-fill"></i><span class="nav-label">Products</span>
+    </a>
+    <a href="#" class="nav-item-custom">
+      <i class="bi bi-wallet2"></i><span class="nav-label">Billing</span>
+    </a>
+    <a href="#" class="nav-item-custom">
+      <i class="bi bi-gear-fill"></i><span class="nav-label">Settings</span>
+    </a>
+
+    <div class="nav-section-title">Support</div>
+    <a href="#" class="nav-item-custom">
+      <i class="bi bi-question-circle-fill"></i><span class="nav-label">Help Center</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="#" class="sidebar-user text-decoration-none">
+      <div class="sidebar-avatar">JD</div>
+      <div class="sidebar-footer-text">
+        <div class="name">Jordan Diaz</div>
+        <div class="role">Admin</div>
+      </div>
+    </a>
+  </div>
+</aside>
+
+<div class="main-wrapper" id="mainWrapper">
+
+  <header class="topbar">
+    <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+      <i class="bi bi-list fs-5"></i>
+    </button>
+
+    <div class="search-box desktop-only">
+      <div class="input-group">
+        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search text-muted-custom"></i></span>
+        <input type="text" class="form-control border-start-0 ps-0" placeholder="Search orders, customers, products...">
+      </div>
+    </div>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span class="d-none d-sm-flex align-items-center gap-2 text-muted-custom small me-2">
+        <span class="status-dot"></span> All systems normal
+      </span>
+      <button class="icon-btn position-relative">
+        <i class="bi bi-bell-fill"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:var(--danger);width:9px;height:9px;padding:0;"></span>
+      </button>
+      <button class="icon-btn" id="rightSidebarToggle" aria-label="Toggle team panel">
+        <i class="bi bi-layout-sidebar-inset-reverse fs-6"></i>
+      </button>
+      <div class="dropdown">
+        <button class="sidebar-avatar avatar-btn d-flex" style="background:var(--accent);" type="button" data-bs-toggle="dropdown" aria-expanded="false">JD</button>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+          <li><h6 class="dropdown-header">Jordan Diaz</h6></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Account settings</a></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Help center</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right"></i> Log out</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+      <div>
+        <h1 class="h4 mb-1">Good morning, Jordan</h1>
+        <p class="text-muted-custom mb-0 small">Here is what is happening with your store today.</p>
+      </div>
+      <button class="btn btn-sm d-flex align-items-center gap-2" style="background:var(--accent);color:#fff;">
+        <i class="bi bi-download"></i> Export report
+      </button>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="card-clean p-3 h-100 stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon" style="background:var(--accent-soft);color:var(--accent);"><i class="bi bi-currency-dollar"></i></div>
+            <span class="trend-chip trend-up"><i class="bi bi-arrow-up-short"></i>12.4%</span>
+          </div>
+          <div class="stat-value">$48,290</div>
+          <div class="text-muted-custom small mt-1">Revenue this month</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <div class="card-clean p-3 h-100 stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon" style="background:var(--accent-2-soft);color:#96660E;"><i class="bi bi-people-fill"></i></div>
+            <span class="trend-chip trend-up"><i class="bi bi-arrow-up-short"></i>4.1%</span>
+          </div>
+          <div class="stat-value">3,842</div>
+          <div class="text-muted-custom small mt-1">Active users</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <div class="card-clean p-3 h-100 stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon" style="background:#E7EEFB;color:#2E5AAC;"><i class="bi bi-bag-check-fill"></i></div>
+            <span class="trend-chip trend-down"><i class="bi bi-arrow-down-short"></i>2.3%</span>
+          </div>
+          <div class="stat-value">1,204</div>
+          <div class="text-muted-custom small mt-1">Orders this month</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <div class="card-clean p-3 h-100 stat-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon" style="background:var(--danger-soft);color:var(--danger);"><i class="bi bi-graph-up-arrow"></i></div>
+            <span class="trend-chip trend-up"><i class="bi bi-arrow-up-short"></i>0.8%</span>
+          </div>
+          <div class="stat-value">3.62%</div>
+          <div class="text-muted-custom small mt-1">Conversion rate</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="card-clean p-3 p-md-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h2 class="h6 mb-0">Revenue over time</h2>
+              <p class="text-muted-custom small mb-0">Last 6 months</p>
+            </div>
+            <select class="form-select form-select-sm" style="width:auto;">
+              <option>6 months</option>
+              <option>12 months</option>
+              <option>This year</option>
+            </select>
+          </div>
+          <canvas id="revenueChart" height="90"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-clean p-3 p-md-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h6 mb-0">Recent orders</h2>
+        <a href="#" class="small fw-semibold text-decoration-none" style="color:var(--accent);">View all</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-clean mb-0">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fw-semibold">#4021</td>
+              <td class="d-flex align-items-center gap-2"><div class="avatar-sm">AK</div>Amara Khan</td>
+              <td class="text-muted-custom">Aug 20, 2026</td>
+              <td>$129.00</td>
+              <td><span class="badge-status badge-paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">#4020</td>
+              <td class="d-flex align-items-center gap-2"><div class="avatar-sm">RL</div>Ravi Lopez</td>
+              <td class="text-muted-custom">Aug 20, 2026</td>
+              <td>$84.50</td>
+              <td><span class="badge-status badge-paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">#4019</td>
+              <td class="d-flex align-items-center gap-2"><div class="avatar-sm">SN</div>Sofia Nunez</td>
+              <td class="text-muted-custom">Aug 19, 2026</td>
+              <td>$212.00</td>
+              <td><span class="badge-status badge-pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">#4018</td>
+              <td class="d-flex align-items-center gap-2"><div class="avatar-sm">TW</div>Theo Wright</td>
+              <td class="text-muted-custom">Aug 19, 2026</td>
+              <td>$56.20</td>
+              <td><span class="badge-status badge-failed">Failed</span></td>
+            </tr>
+            <tr>
+              <td class="fw-semibold">#4017</td>
+              <td class="d-flex align-items-center gap-2"><div class="avatar-sm">ML</div>Mia Larsen</td>
+              <td class="text-muted-custom">Aug 18, 2026</td>
+              <td>$340.00</td>
+              <td><span class="badge-status badge-paid">Paid</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<aside class="right-sidebar" id="rightSidebar">
+  <div class="rs-inner">
+
+    <div class="rs-section">
+      <div class="rs-section-head">
+        <span class="rs-section-label">Online now</span>
+        <span class="rs-count-chip">4</span>
+      </div>
+
+      <div class="rs-team-list">
+        <a href="#" class="rs-team-item">
+          <span class="rs-avatar-wrap">
+            <span class="rs-avatar" style="background:var(--accent);">SC</span>
+            <span class="rs-status-dot rs-online" title="Online"></span>
+          </span>
+          <span class="rs-team-info">
+            <span class="rs-team-name">Sarah Chen</span>
+            <span class="rs-team-role">Product Design</span>
+          </span>
+        </a>
+        <a href="#" class="rs-team-item">
+          <span class="rs-avatar-wrap">
+            <span class="rs-avatar" style="background:#2E5AAC;">MB</span>
+            <span class="rs-status-dot rs-online" title="Online"></span>
+          </span>
+          <span class="rs-team-info">
+            <span class="rs-team-name">Marcus Bell</span>
+            <span class="rs-team-role">Engineering</span>
+          </span>
+        </a>
+        <a href="#" class="rs-team-item">
+          <span class="rs-avatar-wrap">
+            <span class="rs-avatar" style="background:var(--accent-2);">PP</span>
+            <span class="rs-status-dot rs-away" title="Away"></span>
+          </span>
+          <span class="rs-team-info">
+            <span class="rs-team-name">Priya Patel</span>
+            <span class="rs-team-role">Support Lead</span>
+          </span>
+        </a>
+        <a href="#" class="rs-team-item">
+          <span class="rs-avatar-wrap">
+            <span class="rs-avatar" style="background:#2F9E5B;">LK</span>
+            <span class="rs-status-dot rs-online" title="Online"></span>
+          </span>
+          <span class="rs-team-info">
+            <span class="rs-team-name">Lena Kowalski</span>
+            <span class="rs-team-role">Marketing</span>
+          </span>
+        </a>
+        <a href="#" class="rs-team-item">
+          <span class="rs-avatar-wrap">
+            <span class="rs-avatar" style="background:#64748B;">DF</span>
+            <span class="rs-status-dot rs-offline" title="Offline"></span>
+          </span>
+          <span class="rs-team-info">
+            <span class="rs-team-name">Diego Fernandez</span>
+            <span class="rs-team-role">Operations</span>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <div class="rs-section">
+      <div class="rs-section-head">
+        <span class="rs-section-label">Recent activity</span>
+      </div>
+
+      <div class="rs-activity-list">
+        <div class="activity-item">
+          <span class="activity-dot" style="background:var(--success);"></span>
+          <div class="activity-text">
+            <div class="small fw-semibold">New order #4021 placed</div>
+            <div class="text-muted-custom" style="font-size:.75rem;">2 minutes ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot" style="background:var(--accent-2);"></span>
+          <div class="activity-text">
+            <div class="small fw-semibold">Payment pending for #4018</div>
+            <div class="text-muted-custom" style="font-size:.75rem;">18 minutes ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot" style="background:#2E5AAC;"></span>
+          <div class="activity-text">
+            <div class="small fw-semibold">New customer signed up</div>
+            <div class="text-muted-custom" style="font-size:.75rem;">1 hour ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot" style="background:var(--danger);"></span>
+          <div class="activity-text">
+            <div class="small fw-semibold">Order #4009 refunded</div>
+            <div class="text-muted-custom" style="font-size:.75rem;">3 hours ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <span class="activity-dot" style="background:#2F9E5B;"></span>
+          <div class="activity-text">
+            <div class="small fw-semibold">Product "Aria Lamp" restocked</div>
+            <div class="text-muted-custom" style="font-size:.75rem;">5 hours ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
