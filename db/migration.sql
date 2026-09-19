@@ -42,6 +42,84 @@ CREATE TABLE IF NOT EXISTS user_developers (
     INDEX idx_user_developers_developer (developer)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================================
+-- REUSABLE GAME COMPANIES
+-- Keeps each developer/publisher name once and links it to games/users.
+-- Legacy game_catalog developer/publisher columns remain for compatibility.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS company_catalog (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_company_catalog_name (name),
+    KEY idx_company_catalog_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS game_companies (
+    game_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    role ENUM('developer', 'publisher') NOT NULL,
+    PRIMARY KEY (game_id, company_id, role),
+    CONSTRAINT fk_game_companies_game
+        FOREIGN KEY (game_id) REFERENCES game_catalog(id) ON DELETE CASCADE,
+    CONSTRAINT fk_game_companies_company
+        FOREIGN KEY (company_id) REFERENCES company_catalog(id) ON DELETE CASCADE,
+    KEY idx_game_companies_company (company_id),
+    KEY idx_game_companies_role (role)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_companies (
+    user_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    role ENUM('developer', 'publisher') NOT NULL DEFAULT 'developer',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, company_id, role),
+    CONSTRAINT fk_user_companies_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_companies_company
+        FOREIGN KEY (company_id) REFERENCES company_catalog(id) ON DELETE CASCADE,
+    KEY idx_user_companies_company (company_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO company_catalog (name)
+SELECT DISTINCT company_name
+FROM (
+    SELECT TRIM(developer) AS company_name
+    FROM game_catalog
+    WHERE developer IS NOT NULL AND TRIM(developer) <> ''
+    UNION ALL
+    SELECT TRIM(publisher) AS company_name
+    FROM game_catalog
+    WHERE publisher IS NOT NULL AND TRIM(publisher) <> ''
+    UNION ALL
+    SELECT TRIM(developer) AS company_name
+    FROM user_developers
+    WHERE developer IS NOT NULL AND TRIM(developer) <> ''
+) companies
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+INSERT INTO game_companies (game_id, company_id, role)
+SELECT g.id, c.id, 'developer'
+FROM game_catalog g
+INNER JOIN company_catalog c ON c.name = TRIM(g.developer)
+WHERE g.developer IS NOT NULL AND TRIM(g.developer) <> ''
+ON DUPLICATE KEY UPDATE company_id = VALUES(company_id);
+
+INSERT INTO game_companies (game_id, company_id, role)
+SELECT g.id, c.id, 'publisher'
+FROM game_catalog g
+INNER JOIN company_catalog c ON c.name = TRIM(g.publisher)
+WHERE g.publisher IS NOT NULL AND TRIM(g.publisher) <> ''
+ON DUPLICATE KEY UPDATE company_id = VALUES(company_id);
+
+INSERT INTO user_companies (user_id, company_id, role)
+SELECT ud.user_id, c.id, 'developer'
+FROM user_developers ud
+INNER JOIN company_catalog c ON c.name = TRIM(ud.developer)
+ON DUPLICATE KEY UPDATE company_id = VALUES(company_id);
+
 ALTER TABLE posts
     MODIFY COLUMN visibility ENUM(
         'public',
@@ -311,3 +389,19 @@ WHERE slug = 'valorant'
 ON DUPLICATE KEY UPDATE
     feed_url = VALUES(feed_url),
     enabled = 1;
+
+CREATE TABLE IF NOT EXISTS comment_reactions (
+    comment_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (comment_id, user_id),
+    CONSTRAINT fk_comment_reactions_comment
+        FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comment_reactions_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_comment_reactions_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE posts
+    ADD COLUMN topic_type ENUM('game', 'developer', 'publisher') NULL AFTER game_id,
+    ADD COLUMN topic_name VARCHAR(255) NULL AFTER topic_type;

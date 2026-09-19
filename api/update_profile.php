@@ -208,19 +208,24 @@ try {
         static fn ($developer): string => trim((string) $developer),
         (array) ($_POST['developers'] ?? [])
     ), static fn (string $developer): bool => $developer !== '')));
-    $database->prepare('DELETE FROM user_developers WHERE user_id = :user_id')->execute(['user_id' => $userId]);
+    $database->prepare('DELETE FROM user_companies WHERE user_id = :user_id AND role = \'developer\'')->execute(['user_id' => $userId]);
     if ($developers) {
         $placeholders = implode(',', array_fill(0, count($developers), '?'));
         $developerStatement = $database->prepare(
-            "SELECT DISTINCT developer FROM game_catalog WHERE is_active = 1 AND developer IN ({$placeholders})"
+            "SELECT DISTINCT cc.name
+             FROM company_catalog cc
+             INNER JOIN game_companies gc ON gc.company_id = cc.id AND gc.role = 'developer'
+             INNER JOIN game_catalog g ON g.id = gc.game_id AND g.is_active = 1
+             WHERE cc.name IN ({$placeholders})"
         );
         $developerStatement->execute($developers);
         $validDevelopers = $developerStatement->fetchAll(PDO::FETCH_COLUMN);
         $userDeveloperStatement = $database->prepare(
-            'INSERT INTO user_developers (user_id, developer) VALUES (:user_id, :developer)'
+            'INSERT INTO user_companies (user_id, company_id, role)
+             SELECT :user_id, id, \'developer\' FROM company_catalog WHERE name = :name'
         );
         foreach ($validDevelopers as $developer) {
-            $userDeveloperStatement->execute(['user_id' => $userId, 'developer' => $developer]);
+            $userDeveloperStatement->execute(['user_id' => $userId, 'name' => $developer]);
         }
     }
 

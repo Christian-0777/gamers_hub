@@ -70,14 +70,20 @@ $selectedGameRows = [];
 if ($selectedGameIds) {
     $placeholders = implode(',', array_fill(0, count($selectedGameIds), '?'));
     $selectedGameCatalogStatement = $database->prepare(
-        "SELECT id, name, developer FROM game_catalog WHERE is_active = 1 AND id IN ({$placeholders}) ORDER BY name"
+        "SELECT g.id, g.name,
+            (SELECT cc.name FROM game_companies gc INNER JOIN company_catalog cc ON cc.id = gc.company_id WHERE gc.game_id = g.id AND gc.role = 'developer' ORDER BY cc.name LIMIT 1) AS developer
+         FROM game_catalog g WHERE g.is_active = 1 AND g.id IN ({$placeholders}) ORDER BY g.name"
     );
     $selectedGameCatalogStatement->execute($selectedGameIds);
     $selectedGameRows = $selectedGameCatalogStatement->fetchAll();
 }
 
 $selectedDeveloperStatement = $database->prepare(
-    'SELECT developer FROM user_developers WHERE user_id = :user_id ORDER BY developer'
+    'SELECT cc.name
+     FROM user_companies uc
+     INNER JOIN company_catalog cc ON cc.id = uc.company_id
+     WHERE uc.user_id = :user_id AND uc.role = \'developer\'
+     ORDER BY cc.name'
 );
 $selectedDeveloperStatement->execute(['user_id' => $userId]);
 $selectedDevelopers = $selectedDeveloperStatement->fetchAll(PDO::FETCH_COLUMN);
@@ -107,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'DELETE FROM user_goals WHERE user_id = :user_id',
                 'DELETE FROM user_content_preferences WHERE user_id = :user_id',
                 'DELETE FROM user_games WHERE user_id = :user_id',
-                'DELETE FROM user_developers WHERE user_id = :user_id',
+                'DELETE FROM user_companies WHERE user_id = :user_id AND role = \'developer\'',
             ];
             foreach ($deleteStatements as $sql) {
                 $database->prepare($sql)->execute(['user_id' => $_SESSION['user_id']]);
@@ -139,15 +145,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($selectedDevelopers) {
                 $placeholders = implode(',', array_fill(0, count($selectedDevelopers), '?'));
                 $developerStatement = $database->prepare(
-                    "SELECT DISTINCT developer FROM game_catalog WHERE is_active = 1 AND developer IN ({$placeholders})"
+                    "SELECT DISTINCT cc.name
+                     FROM company_catalog cc
+                     INNER JOIN game_companies gc ON gc.company_id = cc.id AND gc.role = 'developer'
+                     INNER JOIN game_catalog g ON g.id = gc.game_id AND g.is_active = 1
+                     WHERE cc.name IN ({$placeholders})"
                 );
                 $developerStatement->execute($selectedDevelopers);
                 $validDevelopers = $developerStatement->fetchAll(PDO::FETCH_COLUMN);
                 $userDeveloperStatement = $database->prepare(
-                    'INSERT INTO user_developers (user_id, developer) VALUES (:user_id, :developer)'
+                    'INSERT INTO user_companies (user_id, company_id, role)
+                     SELECT :user_id, id, \'developer\' FROM company_catalog WHERE name = :name'
                 );
                 foreach ($validDevelopers as $developer) {
-                    $userDeveloperStatement->execute(['user_id' => $userId, 'developer' => $developer]);
+                    $userDeveloperStatement->execute(['user_id' => $userId, 'name' => $developer]);
                 }
             }
             $database->commit();

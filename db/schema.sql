@@ -239,6 +239,36 @@ CREATE TABLE IF NOT EXISTS game_catalog (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS company_catalog (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_company_catalog_name (name),
+    KEY idx_company_catalog_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS game_companies (
+    game_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    role ENUM('developer', 'publisher') NOT NULL,
+    PRIMARY KEY (game_id, company_id, role),
+    CONSTRAINT fk_game_companies_game FOREIGN KEY (game_id) REFERENCES game_catalog(id) ON DELETE CASCADE,
+    CONSTRAINT fk_game_companies_company FOREIGN KEY (company_id) REFERENCES company_catalog(id) ON DELETE CASCADE,
+    KEY idx_game_companies_company (company_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_companies (
+    user_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    role ENUM('developer', 'publisher') NOT NULL DEFAULT 'developer',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, company_id, role),
+    CONSTRAINT fk_user_companies_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_companies_company FOREIGN KEY (company_id) REFERENCES company_catalog(id) ON DELETE CASCADE,
+    KEY idx_user_companies_company (company_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS game_update_sources (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     game_id BIGINT UNSIGNED NOT NULL,
@@ -576,6 +606,14 @@ CREATE TABLE posts (
 
     game_id BIGINT UNSIGNED NULL,
 
+    topic_type ENUM(
+        'game',
+        'developer',
+        'publisher'
+    ) NULL,
+
+    topic_name VARCHAR(255) NULL,
+
     post_type ENUM(
         'text',
         'achievement',
@@ -783,7 +821,35 @@ CREATE TABLE comments (
 
 
 -- ============================================================
--- 12. POST SHARES
+-- 12. COMMENT REACTIONS
+-- Reactions on comments
+-- ============================================================
+
+CREATE TABLE comment_reactions (
+        comment_id BIGINT UNSIGNED NOT NULL,
+        user_id BIGINT UNSIGNED NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        PRIMARY KEY (comment_id, user_id),
+
+        CONSTRAINT fk_comment_reactions_comment
+                FOREIGN KEY (comment_id)
+                REFERENCES comments(id)
+                ON DELETE CASCADE,
+
+        CONSTRAINT fk_comment_reactions_user
+                FOREIGN KEY (user_id)
+                REFERENCES users(id)
+                ON DELETE CASCADE,
+
+        INDEX idx_comment_reactions_user (user_id)
+) ENGINE=InnoDB
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
+-- 13. POST SHARES
 -- Sharing posts
 -- ============================================================
 

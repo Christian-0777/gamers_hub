@@ -6,6 +6,23 @@
 - **Minor Update:** `major.minor`, where `minor` is `1` or greater
 - **Patch Update:** `major.minor.patch`, where `patch` is `1` or greater
 
+## Official Update v5.0
+
+### Feed Discussions, Comments, and Normalized Companies
+
+- Added feed post detail modals with full post content, author metadata, selected topics, full-size vertical media, and expandable comments.
+- Added post reactions, comments, replies, and shares with authenticated and CSRF-protected interactions.
+- Added inline comment expansion and live comment submission on dashboard feed cards.
+- Added nested replies with explicit replied-to attribution, such as "User 2 replied to User 1".
+- Added comment reactions and centralized comment/reply functions in the comments API.
+- Added selectable game, developer, and publisher topics for posts.
+- Added topic behavior that limits developer and publisher topics to General Update, Discussion, Review, and Question posts.
+- Created normalized `company_catalog`, `game_companies`, and `user_companies` tables.
+- Normalized developer and publisher names so each company is stored once and reused across games and user preferences.
+- Updated the feed, account settings, onboarding preferences, My Games page, and catalog API to use normalized company relationships.
+- Added fixed 160x160 dashboard media previews while preserving full-size media in post detail views.
+- Added reply attribution, comment nesting, comment reactions, and related dashboard interaction fixes.
+
 ## Minor Update v4.1
 
 ### My Games and Update Feeds

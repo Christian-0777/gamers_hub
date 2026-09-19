@@ -16,6 +16,25 @@
 		<p class="document-lede">A running record of the features, fixes, and improvements that shape GamersHUB.</p>
 	</header>
 
+	<section class="release latest-release" aria-labelledby="release-50">
+		<div class="release-meta"><span>Official update</span><time datetime="2026-09-19">v5.0</time></div>
+		<h2 id="release-50">Feed discussions, comments, and normalized companies</h2>
+		<ul>
+			<li>Added feed post detail modals with full post content, selected topics, full-size vertical media, and expandable comments.</li>
+			<li>Added authenticated post reactions, comments, replies, and shares with CSRF protection.</li>
+			<li>Added inline comment expansion and live comment submission on dashboard feed cards.</li>
+			<li>Added nested replies with explicit replied-to attribution, such as &quot;User 2 replied to User 1&quot;.</li>
+			<li>Added centralized comment and reply functions through the comments API, including comment reactions.</li>
+			<li>Added selectable game, developer, and publisher topics for posts.</li>
+			<li>Added topic behavior limiting developer and publisher topics to General Update, Discussion, Review, and Question posts.</li>
+			<li>Created normalized <code>company_catalog</code>, <code>game_companies</code>, and <code>user_companies</code> tables.</li>
+			<li>Normalized developer and publisher names so each company is stored once and reused across games and user preferences.</li>
+			<li>Updated feed, account settings, onboarding preferences, My Games, and catalog APIs for normalized company relationships.</li>
+			<li>Added fixed 160x160 dashboard media previews while preserving full-size media in post details.</li>
+			<li>Added reply attribution, comment nesting, comment reactions, and related dashboard interaction fixes.</li>
+		</ul>
+	</section>
+
 	<section class="release latest-release" aria-labelledby="release-41">
 		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-19">v4.1</time></div>
 		<h2 id="release-41">My Games and update feeds</h2>

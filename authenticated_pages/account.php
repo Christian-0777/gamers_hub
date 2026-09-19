@@ -119,7 +119,12 @@ $contentStatement->execute(['user_id' => $userId]);
 $selectedContent = $contentStatement->fetchAll(PDO::FETCH_COLUMN);
 
 $gamePreferenceStatement = db()->prepare(
-    'SELECT g.id, g.name, g.developer
+    'SELECT g.id, g.name,
+            (SELECT cc.name
+             FROM game_companies gc
+             INNER JOIN company_catalog cc ON cc.id = gc.company_id
+             WHERE gc.game_id = g.id AND gc.role = \'developer\'
+             ORDER BY cc.name ASC LIMIT 1) AS developer
      FROM user_games ug
     INNER JOIN game_catalog g ON g.id = ug.game_id
      WHERE ug.user_id = :user_id
@@ -129,10 +134,11 @@ $gamePreferenceStatement->execute(['user_id' => $userId]);
 $selectedGames = $gamePreferenceStatement->fetchAll();
 
 $developerPreferenceStatement = db()->prepare(
-    'SELECT developer
-     FROM user_developers
-     WHERE user_id = :user_id
-     ORDER BY developer'
+    'SELECT cc.name
+     FROM user_companies uc
+     INNER JOIN company_catalog cc ON cc.id = uc.company_id
+     WHERE uc.user_id = :user_id AND uc.role = \'developer\'
+     ORDER BY cc.name'
 );
 $developerPreferenceStatement->execute(['user_id' => $userId]);
 $selectedDevelopers = $developerPreferenceStatement->fetchAll(PDO::FETCH_COLUMN);

@@ -34,14 +34,19 @@ $dashboardLayout = true;
 $dashboardActivePage = 'mygames';
 
 $gameStatement = $database->prepare(
-    'SELECT g.id, g.name, g.developer, g.cover_url, g.icon_url,
+        'SELECT g.id, g.name,
+            (SELECT GROUP_CONCAT(cc.name ORDER BY cc.name SEPARATOR \', \')
+             FROM game_companies gc
+             INNER JOIN company_catalog cc ON cc.id = gc.company_id
+             WHERE gc.game_id = g.id AND gc.role = \'developer\') AS developer,
+            g.cover_url, g.icon_url,
             COUNT(gu.id) AS update_count,
             MAX(gu.published_at) AS latest_update_at
      FROM user_games ug
      INNER JOIN game_catalog g ON g.id = ug.game_id
      LEFT JOIN game_updates gu ON gu.game_id = g.id
      WHERE ug.user_id = :user_id AND g.is_active = 1
-     GROUP BY g.id, g.name, g.developer, g.cover_url, g.icon_url
+    GROUP BY g.id, g.name, g.cover_url, g.icon_url
      ORDER BY latest_update_at DESC, g.name ASC'
 );
 $gameStatement->execute(['user_id' => $_SESSION['user_id']]);
