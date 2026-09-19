@@ -66,3 +66,36 @@ function sendAccountCreatedEmail(string $recipient, string $name): bool
 		return false;
 	}
 }
+
+function sendPasswordResetEmail(string $recipient, string $name, string $resetUrl): bool
+{
+	if (!env('MAIL_HOST')) {
+		return false;
+	}
+
+	$mailer = new PHPMailer(true);
+
+	try {
+		$mailer->isSMTP();
+		$mailer->Host = env('MAIL_HOST');
+		$mailer->Port = (int) env('MAIL_PORT', '587');
+		$mailer->SMTPAuth = true;
+		$mailer->Username = env('MAIL_USERNAME', '');
+		$mailer->Password = env('MAIL_PASSWORD', '');
+		$mailer->SMTPSecure = env('MAIL_ENCRYPTION', 'tls');
+		$mailer->setFrom(env('MAIL_FROM_ADDRESS', 'no-reply@example.com'), env('MAIL_FROM_NAME', 'GamersHUB'));
+		$mailer->addAddress($recipient, $name);
+		$mailer->isHTML(true);
+		$mailer->Subject = 'Reset your GamersHUB password';
+		$safeUrl = htmlspecialchars($resetUrl, ENT_QUOTES, 'UTF-8');
+		$mailer->Body = '<p>Click the button below to reset the password.</p>'
+			. '<p><a href="' . $safeUrl . '" style="display:inline-block;padding:12px 18px;color:#25241d;background:#c9f45b;text-decoration:none;border-radius:8px;font-weight:700;">Reset Password</a></p>'
+			. '<p>This link expires in one hour and can only be used once.</p>';
+		$mailer->AltBody = "Click the button below to reset the password: {$resetUrl}";
+		$mailer->send();
+		return true;
+	} catch (Exception $exception) {
+		error_log('Password reset email failed: ' . $exception->getMessage());
+		return false;
+	}
+}

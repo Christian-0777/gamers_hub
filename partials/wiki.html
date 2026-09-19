@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>GamersHUB Wiki</title>
+	<link rel="icon" type="image/png" href="../assets/icons/logo.png">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/gamers_hub/partials/styles.css">
+</head>
+<body class="wiki-page">
+<main class="document-shell">
+	<header class="document-header">
+		<a class="document-brand" href="../index.php"><img src="../assets/icons/logo.png" alt=""> Gamers<span>HUB</span></a>
+		<p class="document-kicker">Project guide</p>
+		<h1>Everything behind the hub.</h1>
+		<p class="document-lede">GamersHUB is a social web app where gamers post, chat, follow official updates, and keep their whole gaming life in one place.</p>
+		<div class="wiki-meta"><span>Current release: v5.1</span><span>Updated September 19, 2026</span><span>PHP + MySQL</span></div>
+	</header>
+
+	<div class="wiki-layout">
+		<article class="wiki-content">
+			<h2 id="overview">Overview</h2>
+			<p>GamersHUB gives each gamer a profile, social feed, friends, direct messages, and a page of game news. The project lives on GitHub under Christian-0777 and is built for community features that feel useful during and between sessions.</p>
+
+			<h2 id="technology">Technology</h2>
+			<div class="wiki-grid">
+				<section class="wiki-card"><h3>Backend</h3><p>PHP 8.1 or newer with PDO, MySQL or MariaDB, database-backed sessions, and PHPMailer for SMTP email.</p></section>
+				<section class="wiki-card"><h3>Frontend</h3><p>Semantic HTML, CSS with Bootstrap patterns, JavaScript, Google Material Symbols, and Simple Icons for social links.</p></section>
+				<section class="wiki-card"><h3>Media</h3><p>Image uploads use Imagick or GD. Large images are compressed, checked, and stored under randomized file names.</p></section>
+				<section class="wiki-card"><h3>Versioning</h3><p>Major releases use a number such as 5.0, minor releases use 4.1, and patch releases use three numbers such as 3.2.3.</p></section>
+			</div>
+
+			<h2 id="architecture">Architecture</h2>
+			<p>One front controller serves every clean URL, keeping internal file names out of the browser. The code separates JSON endpoints, authentication pages, dashboard pages, shared layout parts, styles, scripts, configuration helpers, database scripts, and upload storage.</p>
+			<p>Signed-in users can reach Home, Analytics, Messages, Notifications, Friends, My Games, Settings, and Preferences. Each user also has a public profile page.</p>
+
+			<h2 id="features">Features</h2>
+			<div class="wiki-grid">
+				<section class="wiki-card"><h3>Accounts</h3><p>Signup uses verified email, hashed passwords, CSRF protection, three-step onboarding, gamer preferences, platform choices, goals, and favorite games.</p></section>
+				<section class="wiki-card"><h3>Profiles and settings</h3><p>Profiles include cover photos, avatars, bios, stats, and social links. Settings cover account, gamer preferences, social, privacy, notifications, and security.</p></section>
+				<section class="wiki-card"><h3>Feed and posts</h3><p>Users publish text, achievements, discussions, questions, LFG posts, and reviews with audience and game-topic controls. Posts support up to 10 images or videos.</p></section>
+				<section class="wiki-card"><h3>Comments and reactions</h3><p>Posts and comments support reactions, nested replies, sharing, and explicit reply attribution. Writes require an authenticated session and CSRF token.</p></section>
+				<section class="wiki-card"><h3>Friends and notifications</h3><p>Friend requests support request, accept, decline, cancel, and unfriend actions. Notifications cover follows, reactions, comments, shares, mentions, and system messages.</p></section>
+				<section class="wiki-card"><h3>Messaging</h3><p>The Messenger-style page includes conversation search, unread counts, emoji, date separators, and polling for new messages.</p></section>
+				<section class="wiki-card"><h3>My Games</h3><p>Selected games receive update feeds from supported public sources. Source hashing prevents duplicate articles and classifies releases, patches, DLC, news, and more.</p></section>
+				<section class="wiki-card"><h3>Database</h3><p>The schema covers users, profiles, sessions, games, companies, preferences, posts, media, reactions, comments, notifications, messages, LFG posts, and communities.</p></section>
+			</div>
+
+			<h2 id="security">Security</h2>
+			<p>Passwords are hashed with PHP's built-in functions. Forms and API writes use CSRF tokens. Sessions live in the database, uploads pass type and size checks, and profile and cover images use randomized storage names.</p>
+
+			<h2 id="setup">Setup</h2>
+			<ol>
+				<li>Host the app on Apache with URL rewriting, PHP 8.1 or newer, and MySQL or MariaDB.</li>
+				<li>Install the Composer dependencies.</li>
+				<li>Import the database schema and starter game data, then apply the migration for older databases.</li>
+				<li>Add your database and mail-server settings to the environment configuration.</li>
+				<li>Open the app and test the mail connection with the included check.</li>
+			</ol>
+
+			<h2 id="release-history">Release history</h2>
+			<div class="release-list">
+				<div class="release-item"><strong>v5.1</strong><p>Password reset flow, clean reset URLs, UTC consistency, local and UTC header clock, support navigation, and responsive Wiki documentation.</p></div>
+				<div class="release-item"><strong>v5.0</strong><p>Post detail modals, comments, replies, reactions, topics, and normalized company tables.</p></div>
+				<div class="release-item"><strong>v4.1</strong><p>My Games page and update feeds.</p></div>
+				<div class="release-item"><strong>v4.0</strong><p>Gamer's Preference tab with game and developer search.</p></div>
+				<div class="release-item"><strong>v3.2</strong><p>Database-backed feed with Following and Friends tabs.</p></div>
+				<div class="release-item"><strong>v3.0</strong><p>Messaging page and latency display in the header.</p></div>
+				<div class="release-item"><strong>v2.0</strong><p>Profile redesign and account settings page.</p></div>
+				<div class="release-item"><strong>v1.0</strong><p>Login, signup, hashed passwords, CSRF protection, and database sessions.</p></div>
+				<div class="release-item"><strong>v0.1</strong><p>Interface release with the Your Feed layout, post composer, and demo content.</p></div>
+			</div>
+
+			<h2 id="known-gaps">Known gaps</h2>
+			<p>Achievements, GClan, and the help center remain placeholder pages. Streams, GClan, and Discover do not have pages yet. The repository also contains a separate dashboard prototype, static previews, a sample game list, and sample uploads.</p>
+		</article>
+
+		<nav class="wiki-toc" aria-label="Wiki sections">
+			<strong>On this page</strong>
+			<a href="#overview">Overview</a>
+			<a href="#technology">Technology</a>
+			<a href="#architecture">Architecture</a>
+			<a href="#features">Features</a>
+			<a href="#security">Security</a>
+			<a href="#setup">Setup</a>
+			<a href="#release-history">Release history</a>
+			<a href="#known-gaps">Known gaps</a>
+		</nav>
+	</div>
+
+	<footer class="document-footer">
+		<a href="../index.php">Return to GamersHUB</a>
+		<a href="change_log.html">Changelog</a>
+		<a href="terms-of-use.html">Terms of Use</a>
+	</footer>
+</main>
+</body>
+</html>

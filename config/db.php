@@ -25,6 +25,7 @@ function db(): PDO
 			PDO::ATTR_EMULATE_PREPARES => false,
 		]
 	);
+	$connection->exec("SET time_zone = '+00:00'");
 
 	return $connection;
 }

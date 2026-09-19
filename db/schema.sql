@@ -10,6 +10,8 @@ CREATE DATABASE IF NOT EXISTS gamers_hub
 
 USE gamers_hub;
 
+SET time_zone = '+00:00';
+
 SET FOREIGN_KEY_CHECKS = 0;
 
 CREATE TABLE users (
@@ -62,6 +64,30 @@ CREATE TABLE email_verification_tokens (
 
     INDEX idx_verification_tokens_user (user_id),
     INDEX idx_verification_tokens_expires (expires_at)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 1.2 PASSWORD RESET TOKENS
+-- ============================================================
+
+CREATE TABLE password_reset_tokens (
+    token_hash CHAR(64) PRIMARY KEY,
+
+    user_id BIGINT UNSIGNED NOT NULL,
+
+    expires_at DATETIME NOT NULL,
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_password_reset_tokens_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    INDEX idx_password_reset_tokens_user (user_id),
+    INDEX idx_password_reset_tokens_expires (expires_at)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;

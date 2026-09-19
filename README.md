@@ -6,6 +6,20 @@
 - **Minor Update:** `major.minor`, where `minor` is `1` or greater
 - **Patch Update:** `major.minor.patch`, where `patch` is `1` or greater
 
+## Minor Update v5.1
+
+### Password Reset, UTC Time, and Support Navigation
+
+- Added password reset requests by email or username with generic responses that do not reveal whether an account exists.
+- Added one-time, hashed password reset tokens stored in `password_reset_tokens` with one-hour expiration and database-backed validation before the new-password form is shown.
+- Added secure password reset email delivery with clean `/reset/@username` links and hidden implementation paths.
+- Added password confirmation, password hashing, token invalidation after use, and success/error modal states.
+- Fixed reset-link validation by decoding encoded username route segments and aligning token expiration with the MySQL clock.
+- Enforced UTC in PHP, application MySQL sessions, schema setup, and migrations.
+- Added a live local timezone and UTC clock with signed offset and milliseconds to the dashboard header.
+- Added new-tab navigation for Wiki, Changelog, Privacy Policy, and Terms of Use in the support sidebar.
+- Refined the Wiki into a responsive project guide and added the shared `/partials/styles.css` entrypoint.
+
 ## Official Update v5.0
 
 ### Feed Discussions, Comments, and Normalized Companies

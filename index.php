@@ -10,7 +10,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 $requestPath = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
 $basePath = appBasePath();
-$route = trim(substr($requestPath, strlen($basePath)), '/');
+$route = rawurldecode(trim(substr($requestPath, strlen($basePath)), '/'));
 $homePage = __DIR__ . '/authenticated_pages/home.php';
 $analyticsPage = __DIR__ . '/authenticated_pages/analytics.php';
 $messagePage = __DIR__ . '/authenticated_pages/message.php';
@@ -28,6 +28,7 @@ $routes = [
     'mygames' => $myGamesPage,
     'settings' => __DIR__ . '/authenticated_pages/account.php',
     'login' => __DIR__ . '/auth_page/login.php',
+    'forgot-password' => __DIR__ . '/auth_page/forgot_password.php',
     'logout' => __DIR__ . '/auth_page/logout.php',
     'signup' => __DIR__ . '/auth_page/signup.php',
     'verify' => __DIR__ . '/auth_page/verify.php',
@@ -39,6 +40,11 @@ if ($route === '' && isset($_SESSION['user_id'], $_SESSION['auth_session_id'])) 
     exit;
 }
 
+if ($route === 'rest_password.php') {
+    header('Location: ' . appUrl('forgot-password'), true, 301);
+    exit;
+}
+
 if (isset($routes[$route])) {
     require $routes[$route];
     exit;
@@ -47,6 +53,18 @@ if (isset($routes[$route])) {
 if (preg_match('/^@([A-Za-z0-9_]{3,30})$/', $route, $matches)) {
     $_GET['username'] = $matches[1];
     require __DIR__ . '/authenticated_pages/profile.php';
+    exit;
+}
+
+if (preg_match('/^reset\/([A-Za-z0-9_]{3,30})$/', $route, $matches)) {
+    $_GET['username'] = $matches[1];
+    require __DIR__ . '/auth_page/reset_password/reset_password.php';
+    exit;
+}
+
+if (preg_match('/^reset\/@([A-Za-z0-9_]{3,30})$/', $route, $matches)) {
+    $_GET['username'] = $matches[1];
+    require __DIR__ . '/auth_page/reset_password/reset_password.php';
     exit;
 }
 

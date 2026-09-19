@@ -11,6 +11,15 @@ RewriteRule ^index\.php$ %1 [R=301,L]
 RewriteCond %{THE_REQUEST} \s(.*?)/(?:auth_page/)?login\.php(?:[?\s]) [NC]
 RewriteRule ^(?:auth_page/)?login\.php$ %1/login [R=301,L]
 
+RewriteCond %{THE_REQUEST} \s(.*?)/rest_password\.php(?:[?\s]) [NC]
+RewriteRule ^rest_password\.php$ %1/forgot-password [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/auth_page/forgot_password\.php(?:[?\s]) [NC]
+RewriteRule ^auth_page/forgot_password\.php$ %1/forgot-password [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s(.*?)/auth_page/reset_password/reset_password\.php(?:[?\s]) [NC]
+RewriteRule ^auth_page/reset_password/reset_password\.php$ %1/login [R=301,L]
+
 RewriteCond %{THE_REQUEST} \s(.*?)/(?:auth_page/)?signup\.php(?:[?\s]) [NC]
 RewriteRule ^(?:auth_page/)?signup\.php$ %1/signup [R=301,L]
 

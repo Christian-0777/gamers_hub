@@ -50,9 +50,21 @@ $profileUrl = $profileUrl ?? appUrl('home');
         </a>
 
         <div class="dashboard-section-title">Support</div>
-        <a href="#" class="dashboard-nav-item" data-coming-soon data-feature="Help center">
-            <span class="material-symbols-rounded" aria-hidden="true">help</span>
-            <span class="dashboard-nav-label">Help center</span>
+        <a href="<?= htmlspecialchars(appUrl('partials/wiki.html'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item" target="_blank" rel="noopener noreferrer">
+            <span class="material-symbols-rounded" aria-hidden="true">menu_book</span>
+            <span class="dashboard-nav-label">Wiki</span>
+        </a>
+        <a href="<?= htmlspecialchars(appUrl('partials/change_log.html'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item" target="_blank" rel="noopener noreferrer">
+            <span class="material-symbols-rounded" aria-hidden="true">history</span>
+            <span class="dashboard-nav-label">Changelog</span>
+        </a>
+        <a href="<?= htmlspecialchars(appUrl('partials/privacy-policy.html'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item" target="_blank" rel="noopener noreferrer">
+            <span class="material-symbols-rounded" aria-hidden="true">privacy_tip</span>
+            <span class="dashboard-nav-label">Privacy Policy</span>
+        </a>
+        <a href="<?= htmlspecialchars(appUrl('partials/terms-of-use.html'), ENT_QUOTES, 'UTF-8') ?>" class="dashboard-nav-item" target="_blank" rel="noopener noreferrer">
+            <span class="material-symbols-rounded" aria-hidden="true">gavel</span>
+            <span class="dashboard-nav-label">Terms of Use</span>
         </a>
     </nav>
 

@@ -16,6 +16,21 @@
 		<p class="document-lede">A running record of the features, fixes, and improvements that shape GamersHUB.</p>
 	</header>
 
+	<section class="release latest-release" aria-labelledby="release-51">
+		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-19">v5.1</time></div>
+		<h2 id="release-51">Password reset, UTC time, and support navigation</h2>
+		<ul>
+			<li>Added email and username password reset requests with generic responses that do not reveal whether an account exists.</li>
+			<li>Added one-time hashed reset tokens in <code>password_reset_tokens</code> with one-hour expiration and validation before the password form appears.</li>
+			<li>Added secure reset email delivery, clean <code>/reset/@username</code> links, password confirmation, token invalidation, and reset success states.</li>
+			<li>Fixed encoded username route handling and aligned token expiration with the MySQL database clock.</li>
+			<li>Enforced UTC across PHP, application database sessions, schema setup, and migrations.</li>
+			<li>Added a live local timezone and UTC clock with signed offset and milliseconds to the dashboard header.</li>
+			<li>Added new-tab support links for Wiki, Changelog, Privacy Policy, and Terms of Use.</li>
+			<li>Refined the Wiki into a responsive project guide using the shared <code>/partials/styles.css</code> entrypoint.</li>
+		</ul>
+	</section>
+
 	<section class="release latest-release" aria-labelledby="release-50">
 		<div class="release-meta"><span>Official update</span><time datetime="2026-09-19">v5.0</time></div>
 		<h2 id="release-50">Feed discussions, comments, and normalized companies</h2>

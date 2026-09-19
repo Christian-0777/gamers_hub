@@ -38,7 +38,7 @@ $notice = $result['notice'];
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                 <label for="identifier">Username or email</label>
                 <input id="identifier" name="identifier" type="text" value="<?= authOld('identifier') ?>" autocomplete="username" required>
-                <div class="label-row"><label for="password">Password</label><a href="#">Forgot password?</a></div>
+                <div class="label-row"><label for="password">Password</label><a href="<?= htmlspecialchars(appUrl('forgot-password'), ENT_QUOTES, 'UTF-8') ?>">Forgot password?</a></div>
                 <div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" required><button type="button" data-toggle-password="password" aria-label="Show password">Show</button></div>
                 <button class="primary-button" type="submit">Log in <span aria-hidden="true">&#8594;</span></button>
             </form>

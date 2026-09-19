@@ -27,3 +27,12 @@ function appUrl(string $path = ''): string
 
     return appBasePath() . ($path === '' ? '/' : '/' . $path);
 }
+
+function absoluteAppUrl(string $path = ''): string
+{
+    $forwardedProtocol = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    $protocol = $forwardedProtocol !== '' ? explode(',', $forwardedProtocol)[0] : ((($_SERVER['HTTPS'] ?? '') !== '' && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http');
+    $host = (string) ($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost');
+
+    return $protocol . '://' . $host . appUrl($path);
+}

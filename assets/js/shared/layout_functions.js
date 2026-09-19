@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modal = document.querySelector('#postModal');
   const accountTrigger = document.querySelector('#dashboardAccountTrigger');
   const accountMenu = document.querySelector('#dashboardAccountMenu');
+  const currentDateTime = document.querySelector('#currentDateTime');
   const currentPing = document.querySelector('#currentPing');
   const pingUrl = document.querySelector('[data-ping-url]')?.dataset.pingUrl;
   const notificationTrigger = document.querySelector('#dashboardNotificationTrigger');
@@ -26,6 +27,33 @@ document.addEventListener('DOMContentLoaded', () => {
     toastElement.style.display = 'block';
     window.setTimeout(() => { toastElement.style.display = ''; }, 2600);
   };
+
+  const pad = (value, length = 2) => String(value).padStart(length, '0');
+  const formatDateTime = (date, utc = false) => {
+    const month = utc ? date.getUTCMonth() + 1 : date.getMonth() + 1;
+    const day = utc ? date.getUTCDate() : date.getDate();
+    const year = utc ? date.getUTCFullYear() : date.getFullYear();
+    const hours = utc ? date.getUTCHours() : date.getHours();
+    const minutes = utc ? date.getUTCMinutes() : date.getMinutes();
+    const seconds = utc ? date.getUTCSeconds() : date.getSeconds();
+    const milliseconds = utc ? date.getUTCMilliseconds() : date.getMilliseconds();
+    return `${pad(month)}/${pad(day)}/${pad(year % 100)} - ${pad(hours)}:${pad(minutes)}:${pad(seconds)}:${pad(milliseconds, 3)}`;
+  };
+  const formatUtcOffset = (date) => {
+    const offsetMinutes = -date.getTimezoneOffset();
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const absoluteMinutes = Math.abs(offsetMinutes);
+    return `${sign}${pad(Math.floor(absoluteMinutes / 60))}:${pad(absoluteMinutes % 60)}`;
+  };
+  const updateDateTime = () => {
+    if (!currentDateTime) return;
+    const now = new Date();
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'LOCAL';
+    currentDateTime.textContent = `${timezone} (${formatDateTime(now)} - ${formatUtcOffset(now)}) | UTC (${formatDateTime(now, true)})`;
+  };
+
+  updateDateTime();
+  window.setInterval(updateDateTime, 10);
 
   const updatePing = async () => {
     if (!currentPing || !pingUrl) return;

@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('UTC');
+
 function env(string $key, ?string $default = null): ?string
 {
 	$value = getenv($key);

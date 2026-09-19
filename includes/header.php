@@ -30,6 +30,9 @@ $headerAvatar = $avatar ?? appUrl('assets/icons/profile.png');
     </div>
 
     <div class="dashboard-topbar-actions ms-auto">
+        <span class="dashboard-clock d-none d-md-flex align-items-center text-muted-custom small" aria-label="Local and UTC date and time">
+            <span id="currentDateTime">LOCAL (00/00/00 - 00:00:00:000 - +00:00) | UTC (00/00/00 - 00:00:00:000)</span>
+        </span>
         <span class="dashboard-latency d-none d-sm-flex align-items-center gap-2 text-muted-custom small" title="Connection latency" data-ping-url="<?= htmlspecialchars(appUrl('api/messages.php'), ENT_QUOTES, 'UTF-8') ?>">
             <span class="dashboard-status-dot"></span>
             <span>Ping: <strong id="currentPing">--</strong>ms</span>
