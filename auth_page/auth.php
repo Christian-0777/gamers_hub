@@ -6,10 +6,10 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/mailer.php';
 require_once __DIR__ . '/../config/urls.php';
 require_once __DIR__ . '/../config/request_context.php';
+require_once __DIR__ . '/../config/session.php';
+require_once __DIR__ . '/../includes/session_manager.php';
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+gamers_session_started();
 
 function csrfToken(): string
 {
@@ -73,36 +73,8 @@ function handleAuthRequest(string $mode): array
                 if (!$user || !password_verify($password, $user['password_hash']) || $user['status'] !== 'active') {
                     $errors[] = 'Those login details are not recognised.';
                 } else {
-                    session_regenerate_id(true);
-                    $sessionId = bin2hex(random_bytes(32));
-                    $sessionStatement = $database->prepare(
-                        'INSERT INTO sessions (id, user_id, ip_address, user_agent, expires_at) VALUES (:id, :user_id, :ip, :agent, :expires_at)'
-                    );
-                    $sessionStatement->execute([
-                        'id' => $sessionId,
-                        'user_id' => $user['id'],
-                        'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
-                        'agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
-                        'expires_at' => (new DateTimeImmutable('+30 days'))->format('Y-m-d H:i:s'),
-                    ]);
-                    $historyStatement = $database->prepare(
-                        'INSERT INTO user_login_history
-                            (user_id, session_id, device_name, ip_hash, location, user_agent, action, created_at)
-                         VALUES
-                            (:user_id, :session_id, :device_name, :ip_hash, :location, :user_agent, :action, NOW())'
-                    );
-                    $historyStatement->execute([
-                        'user_id' => $user['id'],
-                        'session_id' => $sessionId,
-                        'device_name' => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown device'), 0, 120),
-                        'ip_hash' => hash('sha256', (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown')),
-                        'location' => requestLocation(),
-                        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
-                        'action' => 'login',
-                    ]);
+                    createUserSession($database, (int) $user['id']);
                     $database->prepare('UPDATE users SET last_login_at = NOW() WHERE id = :id')->execute(['id' => $user['id']]);
-                    $_SESSION['user_id'] = (int) $user['id'];
-                    $_SESSION['auth_session_id'] = $sessionId;
                     header('Location: ' . appUrl('home'));
                     exit;
                 }

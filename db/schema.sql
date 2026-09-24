@@ -43,6 +43,241 @@ CREATE TABLE users (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================================
+-- ADMINISTRATION
+-- Separate admin access layer for GamersHUB super admin controls.
+-- ============================================================
+
+CREATE TABLE admin_roles (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(255) NULL,
+    is_system TINYINT(1) NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_admin_roles_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE admin_permissions (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    label VARCHAR(120) NOT NULL,
+    category VARCHAR(60) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_admin_permissions_category (category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE admin_role_permissions (
+    role_id BIGINT UNSIGNED NOT NULL,
+    permission_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (role_id, permission_id),
+    CONSTRAINT fk_admin_role_permissions_role FOREIGN KEY (role_id) REFERENCES admin_roles(id) ON DELETE CASCADE,
+    CONSTRAINT fk_admin_role_permissions_permission FOREIGN KEY (permission_id) REFERENCES admin_permissions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE admin_users (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    display_name VARCHAR(100) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role_id BIGINT UNSIGNED NOT NULL,
+    status ENUM('active', 'disabled', 'suspended') NOT NULL DEFAULT 'active',
+    last_login_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_admin_users_role (role_id),
+    KEY idx_admin_users_status (status),
+    CONSTRAINT fk_admin_users_role FOREIGN KEY (role_id) REFERENCES admin_roles(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE admin_sessions (
+    id CHAR(64) PRIMARY KEY,
+    admin_id BIGINT UNSIGNED NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_admin_sessions_admin FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE CASCADE,
+    KEY idx_admin_sessions_admin (admin_id),
+    KEY idx_admin_sessions_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE admin_login_attempts (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    success TINYINT(1) NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_admin_login_attempts_username (username),
+    KEY idx_admin_login_attempts_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE admin_activity_logs (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    admin_id BIGINT UNSIGNED NULL,
+    action VARCHAR(120) NOT NULL,
+    target_type VARCHAR(80) NULL,
+    target_id BIGINT UNSIGNED NULL,
+    details TEXT NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_admin_activity_logs_admin (admin_id),
+    KEY idx_admin_activity_logs_created_at (created_at),
+    CONSTRAINT fk_admin_activity_logs_admin FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE reports (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    reporter_id BIGINT UNSIGNED NOT NULL,
+    reported_user_id BIGINT UNSIGNED NULL,
+    target_type ENUM('post', 'comment', 'user', 'gclan') NOT NULL,
+    target_id BIGINT UNSIGNED NOT NULL,
+    reason VARCHAR(120) NOT NULL,
+    description TEXT NULL,
+    status ENUM('pending', 'reviewing', 'resolved', 'dismissed') NOT NULL DEFAULT 'pending',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_reports_status (status),
+    KEY idx_reports_reporter (reporter_id),
+    KEY idx_reports_user (reported_user_id),
+    CONSTRAINT fk_reports_reporter FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_reports_reported_user FOREIGN KEY (reported_user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE report_actions (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    report_id BIGINT UNSIGNED NOT NULL,
+    admin_id BIGINT UNSIGNED NOT NULL,
+    action ENUM('no_violation', 'warning', 'remove_content', 'suspend_user', 'ban_user', 'dismissed') NOT NULL,
+    notes TEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_report_actions_report (report_id),
+    KEY idx_report_actions_admin (admin_id),
+    CONSTRAINT fk_report_actions_report FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE,
+    CONSTRAINT fk_report_actions_admin FOREIGN KEY (admin_id) REFERENCES admin_users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE gclans (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(120) NOT NULL,
+    slug VARCHAR(120) NOT NULL UNIQUE,
+    description TEXT NULL,
+    owner_id BIGINT UNSIGNED NOT NULL,
+    game_id BIGINT UNSIGNED NULL,
+    privacy ENUM('public', 'private') NOT NULL DEFAULT 'public',
+    status ENUM('active', 'suspended', 'deleted') NOT NULL DEFAULT 'active',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_gclans_owner (owner_id),
+    KEY idx_gclans_game (game_id),
+    CONSTRAINT fk_gclans_owner FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_gclans_game FOREIGN KEY (game_id) REFERENCES game_catalog(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE gclan_members (
+    gclan_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    role ENUM('owner', 'admin', 'member') NOT NULL DEFAULT 'member',
+    joined_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (gclan_id, user_id),
+    KEY idx_gclan_members_user (user_id),
+    CONSTRAINT fk_gclan_members_gclan FOREIGN KEY (gclan_id) REFERENCES gclans(id) ON DELETE CASCADE,
+    CONSTRAINT fk_gclan_members_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE admin_notifications (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    audience_type ENUM('everyone', 'user', 'game', 'gclan') NOT NULL DEFAULT 'everyone',
+    audience_value VARCHAR(255) NULL,
+    status ENUM('draft', 'scheduled', 'sent') NOT NULL DEFAULT 'draft',
+    send_at DATETIME NULL,
+    created_by BIGINT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_admin_notifications_status (status),
+    KEY idx_admin_notifications_created_by (created_by),
+    CONSTRAINT fk_admin_notifications_admin FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO admin_roles (name, description, is_system) VALUES
+    ('Super Admin', 'Full platform control and security rights', 1),
+    ('Admin', 'General administrative access', 1),
+    ('Moderator', 'Moderation and review access', 1),
+    ('Game Manager', 'Game catalog and update management', 1);
+
+INSERT INTO admin_permissions (slug, label, category) VALUES
+    ('users.view', 'View users', 'users'),
+    ('users.suspend', 'Suspend users', 'users'),
+    ('users.ban', 'Ban users', 'users'),
+    ('posts.view', 'View posts', 'content'),
+    ('posts.hide', 'Hide posts', 'content'),
+    ('posts.delete', 'Delete posts', 'content'),
+    ('reports.view', 'View reports', 'content'),
+    ('reports.resolve', 'Resolve reports', 'content'),
+    ('games.manage', 'Manage games', 'games'),
+    ('updates.manage', 'Manage updates', 'games'),
+    ('admins.manage', 'Manage admins', 'admin'),
+    ('settings.manage', 'Manage settings', 'system');
+
+INSERT INTO admin_role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM admin_roles r
+JOIN admin_permissions p ON 1 = 1
+WHERE r.name = 'Super Admin';
+
+INSERT INTO admin_role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM admin_roles r
+JOIN admin_permissions p ON p.slug IN (
+    'users.view',
+    'users.suspend',
+    'posts.view',
+    'posts.hide',
+    'reports.view',
+    'reports.resolve',
+    'games.manage',
+    'updates.manage'
+)
+WHERE r.name = 'Admin';
+
+INSERT INTO admin_role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM admin_roles r
+JOIN admin_permissions p ON p.slug IN (
+    'users.view',
+    'posts.view',
+    'reports.view',
+    'reports.resolve'
+)
+WHERE r.name = 'Moderator';
+
+INSERT INTO admin_role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM admin_roles r
+JOIN admin_permissions p ON p.slug IN (
+    'games.manage',
+    'updates.manage'
+)
+WHERE r.name = 'Game Manager';
+
+INSERT INTO admin_users (username, email, display_name, password_hash, role_id)
+SELECT 'superadmin', 'superadmin@gamershub.local', 'Super Admin', '$2y$10$.Z6MbJqdHyS9ORi2.O7fVuL/9R/l6a1y4KezHJaIO8KOOguFWoxMS', id
+FROM admin_roles
+WHERE name = 'Super Admin';
 
 -- ============================================================
 -- 1.1 EMAIL VERIFICATION TOKENS

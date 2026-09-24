@@ -1,10 +1,13 @@
 document.querySelectorAll('[data-toggle-password]').forEach((button) => {
     button.addEventListener('click', () => {
         const input = document.getElementById(button.dataset.togglePassword);
+        const icon = button.querySelector('.material-symbols-outlined');
         const visible = input.type === 'text';
         input.type = visible ? 'password' : 'text';
-        button.textContent = visible ? 'Show' : 'Hide';
-        button.setAttribute('aria-label', visible ? 'Show password' : 'Hide password');
+        const label = visible ? 'Show password' : 'Hide password';
+        if (icon) icon.textContent = visible ? 'visibility' : 'visibility_off';
+        button.setAttribute('aria-label', label);
+        button.setAttribute('title', label);
     });
 });
 

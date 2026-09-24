@@ -14,6 +14,7 @@ $notice = $result['notice'];
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
     <link rel="stylesheet" href="<?= htmlspecialchars(appUrl('assets/css/auth/auth.css'), ENT_QUOTES, 'UTF-8') ?>">
 </head>
 <body>
@@ -39,7 +40,7 @@ $notice = $result['notice'];
                 <label for="identifier">Username or email</label>
                 <input id="identifier" name="identifier" type="text" value="<?= authOld('identifier') ?>" autocomplete="username" required>
                 <div class="label-row"><label for="password">Password</label><a href="<?= htmlspecialchars(appUrl('forgot-password'), ENT_QUOTES, 'UTF-8') ?>">Forgot password?</a></div>
-                <div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" required><button type="button" data-toggle-password="password" aria-label="Show password">Show</button></div>
+                <div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" required><button type="button" class="password-toggle" data-toggle-password="password" aria-label="Show password" title="Show password"><span class="material-symbols-outlined" aria-hidden="true">visibility</span></button></div>
                 <button class="primary-button" type="submit">Log in <span aria-hidden="true">&#8594;</span></button>
             </form>
             <p class="switch-auth">New to GamersHUB? <a href="<?= htmlspecialchars(appUrl('signup'), ENT_QUOTES, 'UTF-8') ?>">Create an account</a></p>

@@ -65,6 +65,7 @@
             detailsModal.hidden = false;
             document.body.classList.add('post-details-modal-open');
             detailsModal.querySelector('[data-post-details-close]')?.focus();
+            refreshPostComments(header.closest('.feed-post')).catch(() => {});
         };
 
         header.addEventListener('click', (event) => {
@@ -91,6 +92,15 @@
         };
 
         const submitInteraction = async (interaction, content = '') => {
+            const socketAction = interaction === 'comment'
+                ? 'create_comment'
+                : interaction === 'react' ? 'react_post' : 'share_post';
+            if (window.gamersHubRequest && window.gamersHubSocket?.readyState === WebSocket.OPEN) {
+                return window.gamersHubRequest(socketAction, {
+                    post_id: Number(detailsModal.dataset.postId || 0),
+                    ...(content !== '' ? { content } : {}),
+                });
+            }
             const formData = new FormData();
             formData.set('action', 'post_interaction');
             formData.set('interaction', interaction);
@@ -117,9 +127,12 @@
             button.disabled = true;
             try {
                 const result = await submitInteraction('react');
+                const post = detailsModal.closest('.feed-post');
                 button.classList.toggle('is-liked', result.liked);
                 button.setAttribute('aria-pressed', result.liked ? 'true' : 'false');
                 updateModalCount('[data-modal-like-count]', result.like_count);
+                post?.querySelector('.feed-like-count')?.replaceChildren(document.createTextNode(Number(result.like_count || 0).toLocaleString()));
+                post?.querySelector('.feed-like-button')?.classList.toggle('is-liked', result.liked);
             } catch (error) {
                 window.alert(error.message);
             } finally {
@@ -132,8 +145,11 @@
             button.disabled = true;
             try {
                 const result = await submitInteraction('share');
+                const post = detailsModal.closest('.feed-post');
                 button.classList.add('is-shared');
                 updateModalCount('[data-modal-share-count]', result.share_count);
+                post?.querySelector('.feed-share-count')?.replaceChildren(document.createTextNode(Number(result.share_count || 0).toLocaleString()));
+                post?.querySelector('[data-feed-share]')?.classList.add('is-shared');
             } catch (error) {
                 window.alert(error.message);
             } finally {
@@ -172,6 +188,9 @@
                 detailsModal.querySelector('.post-comments-empty')?.remove();
                 updateModalCount('[data-modal-comment-count]', result.comment_count);
                 updateModalCount('[data-modal-comment-heading]', result.comment_count);
+                const post = detailsModal.closest('.feed-post');
+                post?.querySelector('.feed-comment-count')?.replaceChildren(document.createTextNode(Number(result.comment_count || 0).toLocaleString()));
+                post?.querySelector('.feed-inline-comments-heading span')?.replaceChildren(document.createTextNode(Number(result.comment_count || 0).toLocaleString()));
                 input.value = '';
             } catch (error) {
                 window.alert(error.message);
@@ -223,6 +242,7 @@
             button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
             if (expanded) {
                 form?.querySelector('input')?.focus();
+                refreshPostComments(post).catch(() => {});
             }
         });
 
@@ -243,11 +263,14 @@
             submitButton.disabled = true;
 
             try {
-                const response = await fetch(detailsModal.dataset.commentsApi, { method: 'POST', body: formData });
-                const result = await response.json();
-                if (!response.ok || !result.success) {
-                    throw new Error(result.message || 'Unable to add your comment.');
-                }
+                const result = window.gamersHubSocket?.readyState === WebSocket.OPEN
+                    ? await window.gamersHubRequest('create_comment', { post_id: Number(detailsModal.dataset.postId || 0), content })
+                    : await (async () => {
+                        const response = await fetch(detailsModal.dataset.commentsApi, { method: 'POST', body: formData });
+                        const responseData = await response.json();
+                        if (!response.ok || !responseData.success) throw new Error(responseData.message || 'Unable to add your comment.');
+                        return responseData;
+                    })();
 
                 const comment = result.comment;
                 if (comment) {
@@ -277,6 +300,13 @@
     };
 
     const sendCommentRequest = async (detailsModal, action, values) => {
+        const socketAction = action === 'create' ? 'create_comment' : action === 'reply' ? 'reply_comment' : 'react_comment';
+        if (window.gamersHubRequest && window.gamersHubSocket?.readyState === WebSocket.OPEN) {
+            return window.gamersHubRequest(socketAction, {
+                post_id: Number(detailsModal.dataset.postId || 0),
+                ...Object.fromEntries(Object.entries(values).map(([key, value]) => [key, key === 'comment_id' || key === 'parent_id' ? Number(value) : value])),
+            });
+        }
         const formData = new FormData();
         formData.set('action', action);
         formData.set('post_id', detailsModal.dataset.postId || '0');
@@ -292,6 +322,9 @@
     };
 
     const appendCommentElement = (commentsList, comment, detailsModal) => {
+        if (!commentsList || !detailsModal || !comment) {
+            return;
+        }
         const commentElement = document.createElement('article');
         commentElement.className = `post-comment${comment.parent_id ? ' is-comment-reply' : ''}`;
         commentElement.dataset.commentId = comment.id;
@@ -357,6 +390,69 @@
         commentsList.appendChild(commentElement);
     };
 
+    const ensureCommentList = (container, className) => {
+        if (!container) return null;
+        let list = container.querySelector(`.${className}`);
+        if (!list) {
+            list = document.createElement('div');
+            list.className = className;
+            container.appendChild(list);
+        }
+        return list;
+    };
+
+    const refreshPostComments = async (post) => {
+        const detailsModal = post?.querySelector('[data-post-details-modal]');
+        const commentsApi = detailsModal?.dataset.commentsApi;
+        const postId = Number(post?.dataset.postId || 0);
+        if (!post || !detailsModal || !commentsApi || !postId) return;
+
+        const response = await fetch(`${commentsApi}?action=list&post_id=${postId}`, { cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || 'Unable to load the latest comments.');
+
+        const comments = result.comments || [];
+        const inlineList = ensureCommentList(post.querySelector('[data-feed-comments]'), 'feed-inline-comments-list');
+        const modalList = ensureCommentList(detailsModal.querySelector('.post-details-comments'), 'post-comments-list');
+        [inlineList, modalList].forEach((list) => {
+            if (!list) return;
+            list.replaceChildren();
+            comments.forEach((comment) => appendCommentElement(list, comment, detailsModal));
+        });
+        post.querySelector('[data-inline-comments-empty]')?.remove();
+        detailsModal.querySelector('.post-comments-empty')?.remove();
+        const count = Number(result.comment_count ?? comments.length).toLocaleString();
+        post.querySelector('.feed-comment-count')?.replaceChildren(document.createTextNode(count));
+        post.querySelector('.feed-inline-comments-heading span')?.replaceChildren(document.createTextNode(count));
+        detailsModal.querySelector('[data-modal-comment-count]')?.replaceChildren(document.createTextNode(count));
+        detailsModal.querySelector('[data-modal-comment-heading]')?.replaceChildren(document.createTextNode(count));
+    };
+
+    const bindDynamicPostComments = (post) => {
+        if (!post || post.dataset.commentsBound === 'true') return;
+        post.dataset.commentsBound = 'true';
+        const header = post.querySelector('[data-post-details-open]');
+        const detailsModal = post.querySelector('[data-post-details-modal]');
+        const openModal = () => {
+            if (!detailsModal) return;
+            detailsModal.hidden = false;
+            document.body.classList.add('post-details-modal-open');
+            refreshPostComments(post).catch(() => {});
+        };
+        header?.addEventListener('click', (event) => {
+            if (!event.target.closest('[data-post-more]')) openModal();
+        });
+        header?.addEventListener('keydown', (event) => {
+            if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('[data-post-more]')) {
+                event.preventDefault();
+                openModal();
+            }
+        });
+        post.querySelector('[data-feed-comments-toggle]')?.addEventListener('click', () => {
+            refreshPostComments(post).catch(() => {});
+        });
+    };
+
     document.addEventListener('click', async (event) => {
         const reactButton = event.target.closest('[data-comment-react]');
         if (reactButton) {
@@ -414,6 +510,8 @@
             });
             context.post.querySelector('.feed-comment-count').textContent = Number(result.comment_count).toLocaleString();
             context.commentsList.closest('.feed-inline-comments, .post-details-comments')?.querySelector('[data-modal-comment-heading], .feed-inline-comments-heading span')?.replaceChildren(document.createTextNode(Number(result.comment_count).toLocaleString()));
+            context.post.querySelector('[data-modal-comment-count]')?.replaceChildren(document.createTextNode(Number(result.comment_count).toLocaleString()));
+            context.post.querySelector('.feed-inline-comments-heading span')?.replaceChildren(document.createTextNode(Number(result.comment_count).toLocaleString()));
             context.post.querySelector('[data-inline-comments-empty]')?.remove();
             appendCommentElement(context.commentsList, result.comment, context.detailsModal);
             input.value = '';
@@ -455,17 +553,177 @@
     }
 
     document.querySelectorAll('.feed-like-button').forEach((button) => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
             const post = button.closest('.feed-post');
-            const count = post.querySelector('.feed-like-count');
-            const icon = button.querySelector('.material-symbols-rounded');
-            const liked = button.classList.toggle('is-liked');
-            const currentCount = Number.parseInt(count.textContent.replace(/,/g, ''), 10) || 0;
+            const count = post?.querySelector('.feed-like-count');
+            const detailsModal = post?.querySelector('[data-post-details-modal]');
+            const postId = post?.dataset.postId || '0';
+            const csrfToken = detailsModal?.dataset.csrfToken || '';
+            const formData = new FormData();
+            formData.set('action', 'post_interaction');
+            formData.set('interaction', 'react');
+            formData.set('post_id', postId);
+            formData.set('csrf_token', csrfToken);
 
-            count.textContent = (liked ? currentCount + 1 : Math.max(0, currentCount - 1)).toLocaleString();
-            icon.textContent = liked ? 'favorite' : 'favorite';
+            try {
+                const result = window.gamersHubSocket?.readyState === WebSocket.OPEN
+                    ? await window.gamersHubRequest('react_post', { post_id: Number(postId) })
+                    : await (async () => {
+                        const response = await fetch(window.location.href, { method: 'POST', body: formData });
+                        const responseData = await response.json();
+                        if (!response.ok || !responseData.success) throw new Error(responseData.message || 'Unable to update this post.');
+                        return responseData;
+                    })();
+
+                const liked = Boolean(result.liked);
+                const likeCount = Number(result.like_count || 0);
+                button.classList.toggle('is-liked', liked);
+                button.setAttribute('aria-pressed', liked ? 'true' : 'false');
+                if (count) {
+                    count.textContent = likeCount.toLocaleString();
+                }
+
+                const modalButton = detailsModal?.querySelector('[data-post-interaction="react"]');
+                if (modalButton) {
+                    modalButton.classList.toggle('is-liked', liked);
+                    modalButton.setAttribute('aria-pressed', liked ? 'true' : 'false');
+                    const modalCount = detailsModal.querySelector('[data-modal-like-count]');
+                    if (modalCount) {
+                        modalCount.textContent = likeCount.toLocaleString();
+                    }
+                }
+            } catch (error) {
+                window.alert(error.message);
+            }
         });
     });
+
+    document.querySelectorAll('[data-feed-share]').forEach((button) => {
+        button.addEventListener('click', async () => {
+            const post = button.closest('.feed-post');
+            const detailsModal = post?.querySelector('[data-post-details-modal]');
+            const postId = Number(post?.dataset.postId || 0);
+            if (!postId) return;
+            button.disabled = true;
+            try {
+                const result = window.gamersHubSocket?.readyState === WebSocket.OPEN
+                    ? await window.gamersHubRequest('share_post', { post_id: postId })
+                    : await (async () => {
+                        const formData = new FormData();
+                        formData.set('action', 'post_interaction');
+                        formData.set('interaction', 'share');
+                        formData.set('post_id', String(postId));
+                        formData.set('csrf_token', detailsModal?.dataset.csrfToken || '');
+                        const response = await fetch(window.location.href, { method: 'POST', body: formData });
+                        const responseData = await response.json();
+                        if (!response.ok || !responseData.success) throw new Error(responseData.message || 'Unable to share this post.');
+                        return responseData;
+                    })();
+                const count = post.querySelector('.feed-share-count');
+                if (count) count.textContent = Number(result.share_count || 0).toLocaleString();
+                button.classList.add('is-shared');
+            } catch (error) {
+                window.alert(error.message);
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+
+    window.addEventListener('gamershub:socket-message', (event) => {
+        const data = event.detail;
+        if (data.type === 'post_reaction' || data.type === 'post_share') {
+            document.querySelectorAll(`.feed-post[data-post-id="${CSS.escape(String(data.post_id))}"]`).forEach((post) => {
+                const count = post.querySelector(data.type === 'post_reaction' ? '.feed-like-count' : '.feed-share-count');
+                if (count) count.textContent = Number(data[data.type === 'post_reaction' ? 'like_count' : 'share_count']).toLocaleString();
+            });
+        }
+        if (data.type === 'comment_created' || data.type === 'comment_reply') {
+            document.querySelectorAll(`.feed-post[data-post-id="${CSS.escape(String(data.post_id))}"]`).forEach((post) => {
+                const count = Number(data.comment_count || 0).toLocaleString();
+                post.querySelector('.feed-comment-count').textContent = count;
+                post.querySelector('.feed-inline-comments-heading span').textContent = count;
+                post.querySelector('[data-modal-comment-count]')?.replaceChildren(document.createTextNode(count));
+                post.querySelector('[data-modal-comment-heading]')?.replaceChildren(document.createTextNode(count));
+                const comment = data.comment;
+                if (!comment) return;
+                const detailsModal = post.querySelector('[data-post-details-modal]');
+                const inlineList = ensureCommentList(post.querySelector('[data-feed-comments]'), 'feed-inline-comments-list');
+                const modalList = ensureCommentList(detailsModal?.querySelector('.post-details-comments'), 'post-comments-list');
+                const commentSelector = `[data-comment-id="${CSS.escape(String(comment.id))}"]`;
+                if (inlineList && !inlineList.querySelector(commentSelector)) appendCommentElement(inlineList, comment, detailsModal);
+                if (modalList && !modalList.querySelector(commentSelector)) appendCommentElement(modalList, comment, detailsModal);
+                post.querySelector('[data-inline-comments-empty]')?.remove();
+                detailsModal?.querySelector('.post-comments-empty')?.remove();
+            });
+        }
+        if (data.type === 'comment_reaction') {
+            document.querySelectorAll(`.feed-post[data-post-id="${CSS.escape(String(data.post_id))}"] [data-comment-id="${CSS.escape(String(data.comment_id))}"] [data-comment-react]`).forEach((button) => {
+                button.querySelector('b').textContent = Number(data.reaction_count || 0).toLocaleString();
+            });
+        }
+    });
+
+    const feedStream = document.querySelector('.feed-stream');
+    const feedSentinel = feedStream?.querySelector('[data-feed-sentinel]');
+    const feedPageSize = 20;
+    let feedOffset = document.querySelectorAll('.feed-post').length;
+    let feedLoading = false;
+    let feedHasMore = Boolean(feedSentinel);
+
+    const loadMoreFeedPosts = async () => {
+        if (!feedStream || !feedSentinel || feedLoading || !feedHasMore) {
+            return;
+        }
+
+        feedLoading = true;
+        feedSentinel.hidden = false;
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('feed_offset', String(feedOffset));
+            const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) {
+                throw new Error('Unable to load more posts.');
+            }
+
+            const markup = await response.text();
+            const nextDocument = new DOMParser().parseFromString(markup, 'text/html');
+            const nextPosts = Array.from(nextDocument.querySelectorAll('.feed-post'));
+            const existingPostIds = new Set(Array.from(feedStream.querySelectorAll('.feed-post')).map((post) => post.dataset.postId));
+            const newPosts = nextPosts.filter((post) => !existingPostIds.has(post.dataset.postId));
+
+            newPosts.forEach((post) => {
+                feedStream.insertBefore(post, feedSentinel);
+                bindDynamicPostComments(post);
+            });
+            feedOffset += nextPosts.length;
+            feedHasMore = nextPosts.length === feedPageSize;
+            if (!feedHasMore) {
+                feedSentinel.hidden = true;
+                feedSentinel.textContent = 'You have reached the end of your feed.';
+            }
+        } catch (error) {
+            feedSentinel.textContent = error.message;
+        } finally {
+            feedLoading = false;
+        }
+    };
+
+    if (feedSentinel && 'IntersectionObserver' in window) {
+        const feedObserver = new IntersectionObserver((entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                loadMoreFeedPosts();
+            }
+        }, { rootMargin: '0px 0px 500px' });
+        feedObserver.observe(feedSentinel);
+    } else if (feedSentinel) {
+        window.addEventListener('scroll', () => {
+            const remaining = feedSentinel.getBoundingClientRect().top - window.innerHeight;
+            if (remaining < 500) {
+                loadMoreFeedPosts();
+            }
+        }, { passive: true });
+    }
 
     const searchInput = document.querySelector('.dashboard-search input');
     if (!searchInput) {

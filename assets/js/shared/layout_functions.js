@@ -17,9 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const notificationList = document.querySelector('#dashboardNotificationList');
   const notificationBadge = document.querySelector('#dashboardNotificationBadge');
   const notificationCount = document.querySelector('#dashboardNotificationCount');
+  const notificationMarkAll = document.querySelector('#dashboardNotificationMarkAll');
   const notificationApiUrl = notificationTrigger?.dataset.notificationApiUrl || '';
+  const websocketPort = notificationTrigger?.dataset.websocketPort || '8080';
   const rightSidebar = document.querySelector('#dashboardRightSidebar');
   const rightSidebarToggle = document.querySelector('#dashboardRightSidebarToggle');
+  const socketRequests = new Map();
 
   const showToast = (message) => {
     if (!toastElement) return;
@@ -27,6 +30,48 @@ document.addEventListener('DOMContentLoaded', () => {
     toastElement.style.display = 'block';
     window.setTimeout(() => { toastElement.style.display = ''; }, 2600);
   };
+
+  const connectWebSocket = () => {
+    if (!window.WebSocket) return;
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(`${protocol}//${window.location.hostname}:${websocketPort}/gamershub`);
+    window.gamersHubSocket = socket;
+    socket.addEventListener('open', () => {
+      window.dispatchEvent(new CustomEvent('gamershub:socket-status', { detail: { connected: true } }));
+    });
+    socket.addEventListener('message', (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'action_result' && data.request_id && socketRequests.has(data.request_id)) {
+          const request = socketRequests.get(data.request_id);
+          socketRequests.delete(data.request_id);
+          if (data.success) request.resolve(data);
+          else request.reject(new Error(data.message || 'Real-time action failed.'));
+        }
+        window.dispatchEvent(new CustomEvent('gamershub:socket-message', { detail: data }));
+      } catch (error) {
+        window.dispatchEvent(new CustomEvent('layout:toast', { detail: { message: 'Received an invalid real-time update.' } }));
+      }
+    });
+    socket.addEventListener('close', () => {
+      if (window.gamersHubSocket === socket) window.gamersHubSocket = null;
+      window.dispatchEvent(new CustomEvent('gamershub:socket-status', { detail: { connected: false } }));
+      window.setTimeout(connectWebSocket, 3000);
+    });
+  };
+
+  window.gamersHubRequest = (action, payload = {}) => new Promise((resolve, reject) => {
+    const socket = window.gamersHubSocket;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      reject(new Error('Real-time service is unavailable.'));
+      return;
+    }
+    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    socketRequests.set(requestId, { resolve, reject });
+    socket.send(JSON.stringify({ action, request_id: requestId, ...payload }));
+  });
+
+  connectWebSocket();
 
   const pad = (value, length = 2) => String(value).padStart(length, '0');
   const formatDateTime = (date, utc = false) => {
@@ -92,6 +137,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const escapeNotificationText = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
   const notificationIcon = { follow: 'person_add', reaction: 'favorite', comment: 'chat', share: 'share', mention: 'alternate_email', system: 'shield' };
+  const openNotificationPostModal = (notificationRow) => {
+    if (!notificationRow || !notificationRow.dataset.postId) return;
+
+    const modal = document.querySelector(`.feed-post[data-post-id="${CSS.escape(notificationRow.dataset.postId)}"] [data-post-details-modal]`) || document.querySelector(`[data-post-details-modal][data-post-id="${CSS.escape(notificationRow.dataset.postId)}"]`);
+    if (!modal) {
+      return;
+    }
+
+    modal.hidden = false;
+    document.body.classList.add('post-details-modal-open');
+
+    const highlightTarget = notificationRow.dataset.notificationType === 'reaction'
+      ? modal.querySelector('[data-post-interaction="react"]')
+      : modal.querySelector('[data-focus-comment]');
+
+    if (highlightTarget) {
+      highlightTarget.classList.remove('notification-highlight-target');
+      void highlightTarget.offsetWidth;
+      highlightTarget.classList.add('notification-highlight-target');
+      window.setTimeout(() => highlightTarget.classList.remove('notification-highlight-target'), 1800);
+    }
+
+    const dialog = modal.querySelector('.post-details-dialog');
+    if (dialog) {
+      dialog.classList.remove('notification-highlight');
+      void dialog.offsetWidth;
+      dialog.classList.add('notification-highlight');
+      window.setTimeout(() => dialog.classList.remove('notification-highlight'), 1800);
+    }
+
+    if (notificationRow.dataset.notificationType === 'comment') {
+      modal.querySelector('[data-comment-form] input')?.focus();
+    }
+
+    closeNotificationMenu();
+  };
+
   const loadHeaderNotifications = async () => {
     if (!notificationApiUrl || !notificationList) return;
     try {
@@ -102,11 +184,38 @@ document.addEventListener('DOMContentLoaded', () => {
       notificationBadge.textContent = unread > 99 ? '99+' : String(unread);
       notificationBadge.hidden = unread === 0;
       notificationCount.textContent = `${unread} unread`;
-      notificationList.innerHTML = (data.notifications || []).length ? data.notifications.map((item) => `<a class="dashboard-notification-row${item.is_read ? '' : ' unread'}" href="${escapeNotificationText(document.querySelector('.dashboard-notification-more')?.href || '#')}" data-notification-id="${item.id}"><span class="material-symbols-rounded" aria-hidden="true">${notificationIcon[item.type] || 'notifications'}</span><span class="dashboard-notification-copy">${item.actor_name ? `<strong>${escapeNotificationText(item.actor_name)}</strong> ` : ''}${escapeNotificationText(item.message)}<small>${escapeNotificationText(item.created_at)}</small></span></a>`).join('') : '<div class="dashboard-notification-loading">You are all caught up.</div>';
+      if (notificationMarkAll) {
+        notificationMarkAll.disabled = unread === 0;
+      }
+      notificationList.innerHTML = (data.notifications || []).length ? data.notifications.map((item) => `<a class="dashboard-notification-row${item.is_read ? '' : ' unread'}" href="${escapeNotificationText(document.querySelector('.dashboard-notification-more')?.href || '#')}" data-notification-id="${item.id}" data-notification-type="${escapeNotificationText(item.type || 'system')}" ${item.post_id ? `data-post-id="${item.post_id}"` : ''}><span class="material-symbols-rounded" aria-hidden="true">${notificationIcon[item.type] || 'notifications'}</span><span class="dashboard-notification-copy">${item.actor_name ? `<strong>${escapeNotificationText(item.actor_name)}</strong> ` : ''}${escapeNotificationText(item.message)}<small>${escapeNotificationText(item.created_at)}</small></span></a>`).join('') : '<div class="dashboard-notification-loading">You are all caught up.</div>';
     } catch (error) {
       notificationList.innerHTML = '<div class="dashboard-notification-loading">Notifications are unavailable right now.</div>';
     }
   };
+
+  notificationList?.addEventListener('click', (event) => {
+    const row = event.target.closest('.dashboard-notification-row[data-post-id]');
+    if (!row) return;
+    event.preventDefault();
+    openNotificationPostModal(row);
+  });
+
+  notificationMarkAll?.addEventListener('click', async () => {
+    if (!notificationApiUrl || notificationMarkAll.disabled) return;
+    try {
+      const response = await fetch(notificationApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: new URLSearchParams({ action: 'mark_all_read' })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to mark notifications as read.');
+      await loadHeaderNotifications();
+      window.dispatchEvent(new CustomEvent('layout:toast', { detail: { message: 'All notifications marked as read.' } }));
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent('layout:toast', { detail: { message: error.message } }));
+    }
+  });
   const closeNotificationMenu = () => {
     if (!notificationTrigger || !notificationDropdown) return;
     notificationDropdown.hidden = true;

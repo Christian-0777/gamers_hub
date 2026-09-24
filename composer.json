@@ -1,6 +1,7 @@
 {
     "require": {
         "phpmailer/phpmailer": "^7.1",
-        "sendgrid/sendgrid": "^8.1"
+        "sendgrid/sendgrid": "^8.1",
+        "cboden/ratchet": "0.4.4"
     }
 }

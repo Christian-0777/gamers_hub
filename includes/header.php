@@ -39,12 +39,18 @@ $headerAvatar = $avatar ?? appUrl('assets/icons/profile.png');
         </span>
 
         <div class="dashboard-notification-menu">
-            <button class="dashboard-icon-btn position-relative" id="dashboardNotificationTrigger" type="button" aria-label="Notifications" aria-controls="dashboardNotificationDropdown" aria-expanded="false" data-notification-api-url="<?= htmlspecialchars(appUrl('api/notifications.php'), ENT_QUOTES, 'UTF-8') ?>">
+            <button class="dashboard-icon-btn position-relative" id="dashboardNotificationTrigger" type="button" aria-label="Notifications" aria-controls="dashboardNotificationDropdown" aria-expanded="false" data-notification-api-url="<?= htmlspecialchars(appUrl('api/notifications.php'), ENT_QUOTES, 'UTF-8') ?>" data-websocket-port="<?= htmlspecialchars(env('WEBSOCKET_PORT', '8080') ?? '8080', ENT_QUOTES, 'UTF-8') ?>">
                 <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
                 <span class="dashboard-notification-badge" id="dashboardNotificationBadge" hidden>0</span>
             </button>
             <div class="dashboard-notification-dropdown" id="dashboardNotificationDropdown" hidden>
-                <div class="dashboard-notification-heading"><strong>Notifications</strong><span id="dashboardNotificationCount">0 unread</span></div>
+                <div class="dashboard-notification-heading">
+                    <strong>Notifications</strong>
+                    <div class="dashboard-notification-header-meta">
+                        <span id="dashboardNotificationCount">0 unread</span>
+                        <button class="dashboard-notification-mark-all" id="dashboardNotificationMarkAll" type="button" aria-label="Mark all notifications as read" disabled>Mark all as read</button>
+                    </div>
+                </div>
                 <div id="dashboardNotificationList"><div class="dashboard-notification-loading">Loading notifications...</div></div>
                 <a class="dashboard-notification-more" href="<?= htmlspecialchars(appUrl('notifications'), ENT_QUOTES, 'UTF-8') ?>">View more <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a>
             </div>

@@ -70,7 +70,7 @@ $dashboardActivePage = 'message';
 
     <div class="dashboard-main" id="dashboardMain">
         <?php require __DIR__ . '/../includes/header.php'; ?>
-        <main class="messenger" data-api-url="<?= htmlspecialchars(appUrl('api/messages.php'), ENT_QUOTES, 'UTF-8') ?>" data-current-user="<?= (int) $_SESSION['user_id'] ?>" data-default-avatar="<?= htmlspecialchars(appUrl('assets/icons/profile.png'), ENT_QUOTES, 'UTF-8') ?>">
+        <main class="messenger" data-api-url="<?= htmlspecialchars(appUrl('api/messages.php'), ENT_QUOTES, 'UTF-8') ?>" data-websocket-port="<?= htmlspecialchars(env('WEBSOCKET_PORT', '8080') ?? '8080', ENT_QUOTES, 'UTF-8') ?>" data-current-user="<?= (int) $_SESSION['user_id'] ?>" data-default-avatar="<?= htmlspecialchars(appUrl('assets/icons/profile.png'), ENT_QUOTES, 'UTF-8') ?>">
             <aside class="conversation-sidebar">
                 <div class="sidebar-heading">
                     <div><span class="eyebrow">Community</span><h1>Messages</h1></div>

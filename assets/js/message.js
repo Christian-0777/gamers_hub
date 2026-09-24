@@ -78,6 +78,15 @@ document.addEventListener('DOMContentLoaded', () => {
     messages.scrollTop = messages.scrollHeight;
   }
 
+  function handleSocketMessage(event) {
+    const data = event.detail;
+    if (data.type === 'message' && data.message && Number(data.conversation_id) === state.activeId && data.message.id > state.latestId) {
+      renderMessages([data.message], false);
+    }
+    if (data.type === 'message') loadConversations().catch(() => {});
+    if (data.type === 'error') window.dispatchEvent(new CustomEvent('layout:toast', { detail: { message: data.message } }));
+  }
+
   async function loadMessages(replace = true) {
     if (!state.activeId) return;
     const data = await request({ action: 'messages', conversation_id: state.activeId, after_id: replace ? 0 : state.latestId });
@@ -131,13 +140,27 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('action', 'send');
     formData.append('conversation_id', state.activeId);
     formData.append('body', body);
-    try { await request({}, { method: 'POST', body: formData }); input.value = ''; input.style.height = ''; await loadMessages(true); await loadConversations(); } catch (error) { window.dispatchEvent(new CustomEvent('layout:toast', { detail: { message: error.message } })); } finally { send.disabled = input.value.trim() === ''; }
+    try {
+      if (window.gamersHubSocket?.readyState === WebSocket.OPEN) {
+        window.gamersHubSocket.send(JSON.stringify({ action: 'send', conversation_id: state.activeId, body }));
+      } else {
+        await request({}, { method: 'POST', body: formData });
+        await loadMessages(true);
+        await loadConversations();
+      }
+      input.value = '';
+      input.style.height = '';
+    } catch (error) { window.dispatchEvent(new CustomEvent('layout:toast', { detail: { message: error.message } })); } finally { send.disabled = input.value.trim() === ''; }
   });
   input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = `${Math.min(input.scrollHeight, 120)}px`; send.disabled = input.value.trim() === ''; });
   input.addEventListener('keydown', (event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
   search.addEventListener('input', renderConversations);
   document.querySelector('#emojiButton').addEventListener('click', () => { input.value += '🙂'; input.dispatchEvent(new Event('input')); input.focus(); });
   document.querySelector('#mobileBack').addEventListener('click', () => chatArea.classList.remove('mobile-visible'));
+  window.addEventListener('gamershub:socket-message', handleSocketMessage);
   loadConversations().catch((error) => { list.innerHTML = `<div class="message-loading">${escapeText(error.message)}</div>`; });
-  window.setInterval(async () => { try { await loadMessages(false); await loadConversations(); } catch (error) {} }, 4000);
+  window.setInterval(async () => {
+    if (window.gamersHubSocket?.readyState === WebSocket.OPEN) return;
+    try { await loadMessages(false); await loadConversations(); } catch (error) {}
+  }, 4000);
 });

@@ -162,6 +162,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'post_
                     'INSERT INTO post_reactions (post_id, user_id, reaction_type)
                      VALUES (:post_id, :user_id, \'like\')'
                 )->execute(['post_id' => $postId, 'user_id' => $userId]);
+
+                $postOwner = $pdo->prepare(
+                    'SELECT user_id FROM posts WHERE id = :post_id AND status = \'published\' LIMIT 1'
+                );
+                $postOwner->execute(['post_id' => $postId]);
+                $ownerId = $postOwner->fetchColumn();
+                if ($ownerId !== false && (int) $ownerId !== $userId) {
+                    $pdo->prepare(
+                        'INSERT INTO notifications (user_id, actor_id, type, post_id, message)
+                         VALUES (:user_id, :actor_id, \'reaction\', :post_id, \'reacted to your post.\')'
+                    )->execute([
+                        'user_id' => (int) $ownerId,
+                        'actor_id' => $userId,
+                        'post_id' => $postId,
+                    ]);
+                }
+
                 $liked = true;
             }
 
@@ -174,6 +191,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'post_
 
         $pdo->prepare('INSERT INTO post_shares (post_id, user_id) VALUES (:post_id, :user_id)')
             ->execute(['post_id' => $postId, 'user_id' => $userId]);
+
+        $postOwner = $pdo->prepare(
+            'SELECT user_id FROM posts WHERE id = :post_id AND status = \'published\' LIMIT 1'
+        );
+        $postOwner->execute(['post_id' => $postId]);
+        $ownerId = $postOwner->fetchColumn();
+        if ($ownerId !== false && (int) $ownerId !== $userId) {
+            $pdo->prepare(
+                'INSERT INTO notifications (user_id, actor_id, type, post_id, message)
+                 VALUES (:user_id, :actor_id, \'share\', :post_id, \'shared your post.\')'
+            )->execute([
+                'user_id' => (int) $ownerId,
+                'actor_id' => $userId,
+                'post_id' => $postId,
+            ]);
+        }
+
         $shareCount = $pdo->prepare('SELECT COUNT(*) FROM post_shares WHERE post_id = :post_id');
         $shareCount->execute(['post_id' => $postId]);
         $respond(['success' => true, 'share_count' => (int) $shareCount->fetchColumn()]);
@@ -442,8 +476,8 @@ $feedStatement = db()->prepare(
                      OR (p.visibility = \'friends\' AND EXISTS (SELECT 1 FROM followers fo INNER JOIN followers fi ON fi.follower_id = fo.following_id AND fi.following_id = fo.follower_id WHERE fo.follower_id = :feed_friend_id AND fo.following_id = p.user_id))
              )
     ' . $feedFilter . '
-     ORDER BY p.created_at DESC, p.id DESC
-     LIMIT 30'
+    ORDER BY p.created_at DESC, p.id DESC
+    LIMIT 20 OFFSET ' . max(0, (int) ($_GET['feed_offset'] ?? 0))
 );
 $feedParameters = array_merge([
     'feed_owner_id' => $userId,
@@ -731,7 +765,7 @@ $dashboardActivePage = 'home';
                                 <div class="feed-post-actions">
                                     <button class="feed-post-action feed-like-button" type="button"><span class="material-symbols-rounded" aria-hidden="true">favorite</span> Like</button>
                                     <button class="feed-post-action" type="button" data-feed-comments-toggle aria-expanded="false"><span class="material-symbols-rounded" aria-hidden="true">comment</span> Comment</button>
-                                    <button class="feed-post-action" type="button"><span class="material-symbols-rounded" aria-hidden="true">share</span> Share</button>
+                                    <button class="feed-post-action" type="button" data-feed-share><span class="material-symbols-rounded" aria-hidden="true">share</span> Share</button>
                                 </div>
                                 <section class="feed-inline-comments" data-feed-comments hidden aria-label="Comments">
                                     <div class="feed-inline-comments-heading"><strong>Comments</strong><span><?= number_format(count($post['comments'])) ?></span></div>
@@ -804,6 +838,7 @@ $dashboardActivePage = 'home';
                                 </div>
                             </article>
                         <?php endforeach; ?>
+                        <div class="feed-load-status" data-feed-sentinel role="status" aria-live="polite">Loading more posts...</div>
                     <?php endif; ?>
                 </section>
             </div>

@@ -6,6 +6,20 @@
 - **Minor Update:** `major.minor`, where `minor` is `1` or greater
 - **Patch Update:** `major.minor.patch`, where `patch` is `1` or greater
 
+## Minor Update v5.2
+
+### Per-Device User Sessions and Secure Authentication
+
+- Added per-device session creation so each successful login creates a fresh session record instead of reusing or replacing an existing session.
+- Added a dedicated `user_sessions` table with hashed session tokens, device metadata, expiration, and revocation support.
+- Added session bootstrapping with strict cookie settings and localhost-safe HTTPS handling for development.
+- Added a central `requireAuth()` validator that checks the session token against the database on each protected request.
+- Added session destruction and redirect handling when a stored session is missing, expired, or revoked.
+- Enhanced logout behavior so logging out one device revokes only that device's session and leaves other active sessions intact.
+- Added device-aware session metadata such as IP address, user agent, and device label for future security auditing and suspicious-session review.
+- Kept the session layer separate from the PHP cookie so the browser does not directly control authentication state.
+- Established the foundation for future active-session management, device review screens, and session revocation tools.
+
 ## Minor Update v5.1
 
 ### Password Reset, UTC Time, and Support Navigation

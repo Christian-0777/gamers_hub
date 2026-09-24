@@ -125,6 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tokenValid) {
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
 	<link rel="stylesheet" href="<?= htmlspecialchars(appUrl('assets/css/auth/auth.css'), ENT_QUOTES, 'UTF-8') ?>">
 </head>
 <body>
@@ -145,9 +146,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tokenValid) {
 				<input type="hidden" name="username" value="<?= htmlspecialchars($username, ENT_QUOTES, 'UTF-8') ?>">
 				<input type="hidden" name="token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
 				<label for="password">New password</label>
-				<div class="password-field"><input id="password" name="password" type="password" autocomplete="new-password" required><button type="button" data-toggle-password="password" aria-label="Show password">Show</button></div>
+				<div class="password-field"><input id="password" name="password" type="password" autocomplete="new-password" required><button type="button" class="password-toggle" data-toggle-password="password" aria-label="Show password" title="Show password"><span class="material-symbols-outlined" aria-hidden="true">visibility</span></button></div>
 				<label for="password_confirmation">Confirm new password</label>
-				<div class="password-field"><input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required><button type="button" data-toggle-password="password_confirmation" aria-label="Show password">Show</button></div>
+				<div class="password-field"><input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required><button type="button" class="password-toggle" data-toggle-password="password_confirmation" aria-label="Show password" title="Show password"><span class="material-symbols-outlined" aria-hidden="true">visibility</span></button></div>
 				<button class="primary-button" type="submit">Reset Password <span aria-hidden="true">&#8594;</span></button>
 			</form><?php endif; ?>
 		</div>

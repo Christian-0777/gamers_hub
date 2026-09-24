@@ -160,6 +160,25 @@ function getPostComment(PDO $database, int $commentId, int $viewerId = 0): ?arra
 	return $comment ?: null;
 }
 
+function notifyUser(PDO $database, int $recipientId, int $actorId, string $type, int $postId, string $message): void
+{
+	if ($recipientId < 1 || $recipientId === $actorId) {
+		return;
+	}
+
+	$statement = $database->prepare(
+		'INSERT INTO notifications (user_id, actor_id, type, post_id, message)
+		 VALUES (:user_id, :actor_id, :type, :post_id, :message)'
+	);
+	$statement->execute([
+		'user_id' => $recipientId,
+		'actor_id' => $actorId,
+		'type' => $type,
+		'post_id' => $postId > 0 ? $postId : null,
+		'message' => $message,
+	]);
+}
+
 function handleCommentsApiRequest(): void
 {
 	$userId = commentsRequireAuth();
@@ -211,9 +230,31 @@ function handleCommentsApiRequest(): void
 			'parent_id' => $parentId > 0 ? $parentId : null,
 			'content' => $content,
 		]);
-		$comment = getPostComment($database, (int) $database->lastInsertId(), $userId);
+		$commentId = (int) $database->lastInsertId();
+		$comment = getPostComment($database, $commentId, $userId);
 		$count = $database->prepare('SELECT COUNT(*) FROM comments WHERE post_id = :post_id AND status = \'published\'');
 		$count->execute(['post_id' => $postId]);
+
+		if ($action === 'create') {
+			$postOwner = $database->prepare(
+				'SELECT user_id FROM posts WHERE id = :post_id AND status = \'published\' LIMIT 1'
+			);
+			$postOwner->execute(['post_id' => $postId]);
+			$owner = $postOwner->fetchColumn();
+			if ($owner !== false) {
+				notifyUser($database, (int) $owner, $userId, 'comment', $postId, 'commented on your post.');
+			}
+		} else {
+			$replyOwner = $database->prepare(
+				'SELECT c.user_id FROM comments c WHERE c.id = :comment_id AND c.status = \'published\' LIMIT 1'
+			);
+			$replyOwner->execute(['comment_id' => $parentId]);
+			$owner = $replyOwner->fetchColumn();
+			if ($owner !== false) {
+				notifyUser($database, (int) $owner, $userId, 'comment', $postId, 'replied to your comment.');
+			}
+		}
+
 		commentsJsonResponse(['success' => true, 'comment' => $comment, 'comment_count' => (int) $count->fetchColumn()]);
 	}
 

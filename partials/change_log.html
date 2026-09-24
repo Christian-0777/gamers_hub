@@ -16,6 +16,22 @@
 		<p class="document-lede">A running record of the features, fixes, and improvements that shape GamersHUB.</p>
 	</header>
 
+	<section class="release latest-release" aria-labelledby="release-52">
+		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-24">v5.2</time></div>
+		<h2 id="release-52">Per-device user sessions and secure authentication</h2>
+		<ul>
+			<li>Added per-device session creation so each successful login creates a fresh session record instead of reusing or replacing an existing session.</li>
+			<li>Added a dedicated <code>user_sessions</code> table with hashed session tokens, device metadata, expiration, and revocation support.</li>
+			<li>Added session bootstrapping with strict cookie settings and localhost-safe HTTPS handling for development.</li>
+			<li>Added a central <code>requireAuth()</code> validator that checks the session token against the database on every protected request.</li>
+			<li>Added session destruction and redirect handling when a stored session is missing, expired, or revoked.</li>
+			<li>Enhanced logout behavior so logging out one device revokes only that device's session and leaves other active sessions intact.</li>
+			<li>Added device-aware session metadata such as IP address, user agent, and device label for future security auditing and suspicious-session review.</li>
+			<li>Kept the session layer separate from the PHP cookie so the browser does not directly control authentication state.</li>
+			<li>Established the foundation for active-session management, device review screens, and session revocation tools.</li>
+		</ul>
+	</section>
+
 	<section class="release latest-release" aria-labelledby="release-51">
 		<div class="release-meta"><span>Minor update</span><time datetime="2026-09-19">v5.1</time></div>
 		<h2 id="release-51">Password reset, UTC time, and support navigation</h2>
